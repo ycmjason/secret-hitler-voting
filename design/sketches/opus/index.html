@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secret Hitler Voting · sketch “The Ballot Office”</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Courier+Prime:wght@400;700&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14120f;        /* screen background: lamp-off desk */
+    --desk: #1e1b17;       /* raised surfaces */
+    --desk-2: #29251f;     /* pressed / secondary */
+    --rule: #3b352c;       /* hairlines */
+    --text: #ece3cf;       /* type on dark */
+    --muted: #a89c86;      /* secondary type on dark */
+    --paper: #e8dcc2;      /* ballot card stock */
+    --paper-edge: #cbbd9c;
+    --paper-ink: #1c1813;
+    --paper-muted: #63584a;
+    --brass: #c9a24a;      /* the one action colour */
+    --brass-ink: #1f1806;
+    --oxblood: #a3342a;    /* FAILED stamp, destructive */
+    --oxblood-lit: #e3786a;/* oxblood legible on dark */
+    --verdigris: #2c6a4f;  /* PASSED stamp */
+    --kraft: #7b5e40;
+    --kraft-dark: #644b31;
+    --amber: #d9a441;
+    --live: #86b593;
+
+    --display: "Big Shoulders Display", "Libre Franklin", sans-serif;
+    --body: "Libre Franklin", system-ui, sans-serif;
+    --typed: "Courier Prime", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  ::selection { background: var(--brass); color: var(--brass-ink); }
+  html { background: #0b0a08; color: var(--text); }
+  body { margin: 0; font: 16px/1.45 var(--body); }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
+  :focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+  svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  svg.i.sm { width: 16px; height: 16px; }
+
+  /* ---------- page chrome ---------- */
+  .page-head { max-width: 1180px; margin: 0 auto; padding: 72px 40px 24px; }
+  .page-head h1 { font: 900 64px/0.95 var(--display); text-transform: uppercase; letter-spacing: 0.01em; margin: 0 0 18px; }
+  .page-head p { max-width: 68ch; color: var(--muted); margin: 0 0 12px; font-size: 17px; }
+  .page-head p b { color: var(--text); font-weight: 600; }
+  .rules { height: 7px; border-top: 3px solid var(--text); border-bottom: 1px solid var(--text); margin: 0 0 22px; max-width: 420px; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .sw { display: flex; align-items: center; gap: 8px; font: 13px var(--typed); color: var(--muted); }
+  .sw i { width: 22px; height: 22px; border-radius: 4px; display: block; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+  .wall { display: flex; flex-wrap: wrap; gap: 64px 48px; justify-content: center; padding: 48px 32px 120px; max-width: 1800px; margin: 0 auto; }
+  .group-title { flex-basis: 100%; font: 800 28px var(--display); text-transform: uppercase; letter-spacing: 0.04em; border-top: 1px solid var(--rule); padding-top: 28px; margin: 8px 0 -24px; color: var(--muted); }
+  figure.shot { margin: 0; width: 390px; }
+  figcaption { margin-top: 26px; }
+  figcaption .lbl { font: 800 22px/1.1 var(--display); text-transform: uppercase; letter-spacing: 0.03em; display: flex; gap: 10px; }
+  figcaption .lbl span { color: var(--brass); }
+  figcaption p { color: var(--muted); font-size: 14px; margin: 6px 0 0; max-width: 60ch; }
+  .replay { margin-top: 10px; font: 700 14px var(--typed); color: var(--brass); border: 1px solid var(--rule); border-radius: 999px; padding: 8px 14px; display: inline-flex; gap: 8px; align-items: center; }
+
+  /* ---------- phone ---------- */
+  .phone { width: 390px; height: 844px; border-radius: 52px; overflow: hidden; position: relative; background: var(--ink);
+    box-shadow: 0 0 0 9px #050504, 0 0 0 10px #2e2a23, 0 40px 80px -20px rgba(0,0,0,.8);
+    background-image: radial-gradient(120% 70% at 50% 0%, #1c1915 0%, var(--ink) 60%); }
+  .sb { position: absolute; top: 0; left: 0; right: 0; height: 47px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 34px; font: 600 16px var(--body); z-index: 30; }
+  .sb .isl { position: absolute; left: 50%; top: 11px; width: 120px; height: 34px; background: #000; border-radius: 20px; transform: translateX(-50%); }
+  .sb .r { display: flex; gap: 6px; align-items: center; }
+  .home { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; border-radius: 3px; background: var(--text); opacity: .85; transform: translateX(-50%); z-index: 30; }
+  .scr { position: absolute; inset: 47px 0 34px; padding: 4px 20px 12px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+
+  /* ---------- shared bits ---------- */
+  .hd { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+  .room { display: flex; align-items: baseline; gap: 8px; }
+  .room .typed { font: 400 13px var(--typed); color: var(--muted); }
+  .room b { font: 800 30px/1 var(--display); letter-spacing: 0.16em; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--live); align-self: center; box-shadow: 0 0 0 3px rgba(134,181,147,.16); }
+  .dot.wait { background: var(--amber); box-shadow: 0 0 0 3px rgba(217,164,65,.18); animation: blink 1.2s infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .hd-actions { display: flex; gap: 6px; }
+  .ib { height: 44px; min-width: 44px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--text); background: var(--desk); padding: 0 12px; font: 600 15px var(--body); }
+  .ib.round { padding: 0; width: 44px; }
+
+  .prog .count { display: flex; align-items: baseline; gap: 10px; }
+  .prog .count b { font: 900 58px/0.9 var(--display); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  .prog .count span { font: 700 24px var(--display); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .meter { display: flex; gap: 5px; margin: 10px 0 8px; }
+  .meter i { flex: 1; height: 6px; border-radius: 2px; background: var(--rule); }
+  .meter i.on { background: var(--text); }
+  .waiting { margin: 0; color: var(--muted); font-size: 15px; }
+  .waiting b { color: var(--text); font-weight: 600; }
+
+  /* ballot slips: identical by rule. Only the word differs. */
+  .slips { display: grid; grid-template-columns: repeat(2, 146px); justify-content: center; gap: 16px; }
+  .slip { position: relative; width: 100%; aspect-ratio: 5 / 7; border-radius: 10px; background: var(--paper); color: var(--paper-ink); display: block;
+    box-shadow: 0 1px 0 #f4ecd9 inset, 0 12px 20px -10px rgba(0,0,0,.75);
+    transition: transform .12s cubic-bezier(.2,0,0,1), box-shadow .12s; }
+  .slip:active, .slip.pressed { transform: translateY(3px) scale(.985); box-shadow: 0 1px 0 #f4ecd9 inset, 0 4px 8px -4px rgba(0,0,0,.7); }
+  .slip .frame { position: absolute; inset: 8px; border: 6px solid var(--paper-ink); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+  .slip .frame::before { content: ""; position: absolute; inset: 4px; border: 1.5px solid var(--paper-ink); border-radius: 1px; }
+  .slip .lock { transform: rotate(-90deg); display: flex; flex-direction: column; align-items: center; gap: 4px; white-space: nowrap; }
+  .slip .word { font: 900 var(--wsize, 84px)/0.8 var(--display); letter-spacing: 0.02em; padding-top: 0.08em; }
+  .slip .gloss { font: 700 11px var(--typed); letter-spacing: .32em; margin-right: -.32em; color: var(--paper-muted); }
+  .hint { font-size: 13px; color: var(--muted); text-align: center; margin: -6px 0 0; }
+  .hint button { color: var(--text); text-decoration: underline; text-underline-offset: 3px; font-weight: 600; min-height: 44px; }
+
+  .roster h2 { font: 800 18px var(--display); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 4px; display: flex; justify-content: space-between; }
+  .roster ul { list-style: none; margin: 0; padding: 0; }
+  .r { display: flex; align-items: center; gap: 8px; min-height: 39px; border-top: 1px solid var(--rule); }
+  .r:last-child { border-bottom: 1px solid var(--rule); }
+  .r .nm { font: 700 16px var(--typed); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .r .tag { font: 600 11px var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--brass-ink); background: var(--brass); padding: 2px 6px; border-radius: 3px; }
+  .r .off { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 13px; }
+  .r .st { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+  .r .st.wait { color: var(--muted); font-weight: 500; }
+  .r .st.wait::after { content: ""; width: 14px; height: 2px; background: linear-gradient(90deg, var(--muted) 30%, transparent 30% 50%, var(--muted) 50% 80%, transparent 80%); }
+  .r.dead .nm { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--muted); }
+  .r.dead .st { color: var(--muted); font-weight: 500; }
+  .r.offline .nm { color: #cfc5b1; }
+  .r .mini { min-height: 36px; padding: 0 12px; border-radius: 8px; background: var(--desk-2); font: 600 14px var(--body); }
+  .r .mini.danger { color: var(--oxblood-lit); }
+  .r .acts { margin-left: auto; display: flex; gap: 6px; }
+  .manage-link { align-self: center; min-height: 44px; display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 600; font-size: 15px; }
+
+  .btn { min-height: 56px; border-radius: 14px; font: 700 18px var(--body); display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 0 18px; }
+  .btn.primary { background: var(--brass); color: var(--brass-ink); box-shadow: 0 8px 18px -10px rgba(201,162,74,.6); }
+  .btn.ghost { background: var(--desk); color: var(--text); }
+  .btn.danger { background: var(--oxblood); color: #fbefe9; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* sealed envelope + hold to check */
+  .cast h3 { font: 900 40px/1 var(--display); text-transform: uppercase; letter-spacing: 0.02em; margin: 0 0 4px; }
+  .cast p { margin: 0 0 14px; color: var(--muted); font-size: 15px; }
+  .env { position: relative; height: 150px; margin: 0 6px; }
+  .env > * { position: absolute; left: 0; right: 0; }
+  .env .back { inset: 0; background: var(--kraft-dark); border-radius: 6px; }
+  .env .slip-in { left: 50%; width: 168px; margin-left: -84px; top: 18px; height: 120px; background: var(--paper); color: var(--paper-ink); border-radius: 8px;
+    opacity: 0; transition: transform .28s cubic-bezier(.16,1,.3,1), opacity .1s; }
+  .env .slip-in .frame { position: absolute; inset: 6px; border: 5px solid var(--paper-ink); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .env .slip-in .frame::before { content: ""; position: absolute; inset: 3px; border: 1.25px solid var(--paper-ink); }
+  .env .slip-in .w { font: 900 54px/0.8 var(--display); letter-spacing: .02em; padding-top: 4px; }
+  .env .slip-in .gloss { font: 700 10px var(--typed); letter-spacing: .32em; margin-right: -.32em; color: var(--paper-muted); }
+  .env .front { inset: 0; background: var(--kraft); border-radius: 6px; clip-path: polygon(0 18%, 50% 58%, 100% 18%, 100% 100%, 0 100%); box-shadow: inset 0 -1px 0 rgba(0,0,0,.2); }
+  .env .front span { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font: 700 13px var(--typed); color: #2a1f13; letter-spacing: .14em; }
+  .env .flap { top: 0; height: 62%; background: #6f5437; clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .28s cubic-bezier(.16,1,.3,1); z-index: 3; border-radius: 6px 6px 0 0; }
+  .env .seal { position: absolute; left: 50%; top: 52%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: var(--oxblood); z-index: 4; box-shadow: 0 2px 3px rgba(0,0,0,.4), inset 0 0 0 4px rgba(0,0,0,.12); transition: opacity .15s; }
+  .holdable.held .env .seal { opacity: 0; }
+  .holdable.held .env .slip-in { opacity: 1; transform: translateY(-30px) rotate(-1.5deg); z-index: 5; box-shadow: 0 14px 24px -10px rgba(0,0,0,.7); }
+  .hold { margin-top: 14px; width: 100%; min-height: 60px; border-radius: 14px; background: var(--desk); border: 1px dashed #5a5246; display: flex; align-items: center; justify-content: center; gap: 10px; font: 600 16px var(--body);
+    user-select: none; -webkit-user-select: none; touch-action: none; transition: background .12s, color .12s; }
+  .hold .on { display: none; }
+  .hold .off { display: inline-flex; align-items: center; gap: 10px; }
+  .holdable.held .hold { background: var(--paper); color: var(--paper-ink); border-color: transparent; }
+  .holdable.held .hold .off { display: none; }
+  .holdable.held .hold .on { display: inline-flex; align-items: baseline; gap: 6px; }
+  .hold .on b { margin-left: 0; }
+  .hold .on b { font: 900 24px var(--display); letter-spacing: .04em; margin-left: 4px; }
+
+  /* deceased notice: period mourning border */
+  .notice { background: var(--paper); color: var(--paper-ink); border-radius: 4px; padding: 20px 20px 18px; border: 7px solid #0b0a08; outline: 1px solid var(--paper-edge); outline-offset: -11px; }
+  .notice h3 { font: 900 46px/0.95 var(--display); text-transform: uppercase; margin: 0 0 10px; }
+  .notice p { margin: 0 0 8px; font-size: 15px; }
+  .notice .small { font: 400 13px var(--typed); color: var(--paper-muted); margin: 12px 0 0; }
+
+  /* result */
+  .res-head h1 { font: 900 44px/1 var(--display); text-transform: uppercase; margin: 0; letter-spacing: 0.02em; }
+  .res-head p { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
+  .sheet { position: relative; background: var(--paper); color: var(--paper-ink); border-radius: 4px; padding: 16px 0 34px; display: grid; grid-template-columns: 1fr 1fr; box-shadow: 0 18px 30px -14px rgba(0,0,0,.8); }
+  .sheet .col { text-align: center; padding: 0 12px; }
+  .sheet .col + .col { border-left: 1.5px solid var(--paper-ink); }
+  .sheet .lab { font: 900 26px var(--display); letter-spacing: .06em; display: block; }
+  .sheet .num { font: 900 112px/0.9 var(--display); display: block; font-variant-numeric: tabular-nums; margin: 4px 0 6px; }
+  .sheet svg.tally { width: 110px; height: 34px; stroke: var(--paper-ink); stroke-width: 3.2; stroke-linecap: round; fill: none; }
+  .sheet .rule-top { position: absolute; left: 14px; right: 14px; top: 8px; height: 0; }
+  .stamp { position: absolute; left: 50%; bottom: -26px; transform: translateX(-50%) rotate(-7deg); font: 900 54px/1 var(--display); letter-spacing: .1em; padding: 6px 14px 4px 20px;
+    border: 4px solid currentColor; border-radius: 8px; outline: 1.5px solid currentColor; outline-offset: 3px; background: rgba(232,220,194,.86); white-space: nowrap; }
+  .stamp.pass { color: var(--verdigris); }
+  .stamp.fail { color: var(--oxblood); }
+  .verdict { margin: 34px 0 0; text-align: center; font-size: 16px; }
+  .verdict b { font-weight: 700; }
+  .ledger-strip { border-top: 1px solid var(--rule); padding-top: 8px; }
+  .ledger-strip .lr { display: flex; justify-content: space-between; font: 400 14px var(--typed); color: var(--muted); padding: 4px 0; }
+  .ledger-strip .lr b { font-weight: 700; color: var(--text); }
+  .ledger-strip button { font: 600 14px var(--body); color: var(--text); text-decoration: underline; text-underline-offset: 3px; min-height: 36px; }
+
+  .curtain { position: absolute; inset: 0; background: var(--ink); z-index: 20; display: flex; align-items: center; justify-content: center; font: 700 18px var(--typed); letter-spacing: .12em; color: var(--text); opacity: 0; pointer-events: none; }
+  .play .curtain { animation: curtain .4s ease-out both; }
+  .play .res-head { animation: rise .3s cubic-bezier(.16,1,.3,1) both .1s; }
+  .play .sheet { animation: sheetIn .35s cubic-bezier(.16,1,.3,1) both .12s, thud .18s ease-out both var(--thud); }
+  .play .sheet .lab { animation: fade .2s both .3s; }
+  .play .stamp { animation: slam .22s cubic-bezier(.3,0,.1,1) both var(--slam); }
+  .play .after { animation: rise .35s cubic-bezier(.16,1,.3,1) both var(--after); }
+  .play .tally line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .1s ease-out forwards; }
+  @keyframes curtain { 0%, 50% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes sheetIn { from { opacity: 0; transform: translateY(120px) rotate(3deg); } to { opacity: 1; transform: none; } }
+  @keyframes slam { 0% { opacity: 0; transform: translateX(-50%) rotate(-16deg) scale(2.8); filter: blur(8px); } 70% { opacity: 1; filter: blur(0); } 100% { opacity: 1; transform: translateX(-50%) rotate(-7deg) scale(1); filter: blur(0); } }
+  @keyframes thud { 0% { transform: none; } 30% { transform: translateY(4px) scale(.992); } 100% { transform: none; } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* sheets / overlays */
+  .dim { position: absolute; inset: 0; background: rgba(8,7,5,.72); z-index: 10; }
+  .bsheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 11; background: #221f1a; border-radius: 22px 22px 0 0; padding: 10px 20px 48px; box-shadow: 0 -20px 40px -10px rgba(0,0,0,.7); }
+  .bsheet .grab { width: 40px; height: 5px; border-radius: 3px; background: #4a4338; margin: 0 auto 16px; }
+  .bsheet h2 { font: 900 36px/1 var(--display); text-transform: uppercase; margin: 0 0 6px; letter-spacing: .02em; }
+  .bsheet p { margin: 0 0 18px; color: var(--muted); font-size: 15px; }
+  .ledger { list-style: none; padding: 0; margin: 0 0 8px; }
+  .ledger li { display: grid; grid-template-columns: 74px 1fr auto; align-items: center; gap: 8px; min-height: 52px; border-top: 1px solid var(--rule); font: 400 15px var(--typed); }
+  .ledger li:last-child { border-bottom: 1px solid var(--rule); }
+  .ledger .score { font: 800 24px var(--display); letter-spacing: .04em; }
+  .ledger .why { font-size: 12px; color: var(--muted); display: block; }
+  .mstamp { font: 900 15px var(--display); letter-spacing: .12em; padding: 3px 8px 2px; border: 2px solid currentColor; border-radius: 4px; transform: rotate(-3deg); }
+  .mstamp.pass { color: #8cc4a6; }
+  .mstamp.fail { color: var(--oxblood-lit); }
+  .ledger li.now { color: var(--muted); }
+
+  .manage-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--brass); color: var(--brass-ink); border-radius: 14px; padding: 10px 10px 10px 16px; }
+  .manage-bar b { font: 900 22px var(--display); text-transform: uppercase; letter-spacing: .04em; display: block; line-height: 1; }
+  .manage-bar small { font-size: 13px; font-weight: 500; }
+  .manage-bar button { background: var(--brass-ink); color: var(--brass); border-radius: 10px; min-height: 44px; padding: 0 16px; font-weight: 700; }
+  .tools { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+  .tools .btn { justify-content: flex-start; }
+  .tools .btn small { margin-left: auto; color: var(--muted); font: 400 13px var(--body); }
+
+  .banner { display: flex; align-items: center; gap: 12px; background: #2f2717; color: #f1dca9; border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .banner b { display: block; font-size: 15px; }
+  .spinner { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgba(241,220,169,.25); border-top-color: var(--amber); animation: spin .9s linear infinite; flex: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .stale { opacity: .45; filter: saturate(.6); pointer-events: none; }
+
+  /* landing & join */
+  .mast { text-align: center; padding-top: 18px; }
+  .mast .rules { margin: 0 auto 12px; max-width: none; }
+  .mast .rules.b { border-top-width: 1px; border-bottom-width: 3px; margin: 12px auto 0; }
+  .mast h1 { font: 900 50px/0.92 var(--display); text-transform: uppercase; margin: 0; letter-spacing: 0.01em; }
+  .mast .sub { font: 400 12px var(--typed); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between; }
+  .duo { position: relative; height: 172px; margin: 0; }
+  .duo .slip { position: absolute; width: 112px; top: 8px; pointer-events: none; --wsize: 62px; }
+  .duo .slip .frame { inset: 6px; border-width: 5px; }
+  .duo .slip .gloss { font-size: 9px; }
+  .duo .slip:first-child { left: 62px; transform: rotate(-7deg); }
+  .duo .slip:last-child { right: 62px; transform: rotate(6deg); top: 4px; }
+  .lede { text-align: center; margin: 0 8px; font-size: 17px; }
+  .or { display: flex; align-items: center; gap: 12px; color: var(--muted); font: 400 13px var(--typed); text-transform: uppercase; letter-spacing: .14em; }
+  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+  .code-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: -8px; }
+  .code-row label { font-weight: 600; font-size: 15px; }
+  .code-row .err { font-size: 13px; color: var(--oxblood-lit); font-weight: 600; opacity: 0; transition: opacity .15s; }
+  .code-row .err.show { opacity: 1; }
+  .codebox { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .codebox input { width: 100%; height: 72px; border-radius: 10px; text-align: center; font: 900 44px/1 var(--display); text-transform: uppercase; padding: 4px 0 0;
+    background: transparent; color: var(--text); border: 1.5px dashed #5a5246; caret-color: transparent; outline: none; transition: background .12s, border-color .12s, transform .12s; }
+  .codebox input:not(:placeholder-shown) { background: var(--paper); color: var(--paper-ink); border: 1.5px solid var(--paper-edge); box-shadow: 0 8px 14px -10px rgba(0,0,0,.8); }
+  .codebox input:focus, .codebox input.cur { border: 2px solid var(--brass); background: var(--desk); }
+  .codebox input:focus:not(:placeholder-shown) { background: var(--paper); }
+  .codebox.bad input:focus, .codebox.bad input.cur { animation: shake .3s; border-color: var(--oxblood-lit); }
+  @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  .btn.join[disabled] { background: var(--desk); color: #6f6657; cursor: default; box-shadow: none; }
+  .fine { text-align: center; font: 400 13px var(--typed); color: var(--muted); margin: auto 0 0; }
+
+  .field label { display: block; font-weight: 600; margin-bottom: 8px; }
+  .field .inp { height: 60px; border-radius: 12px; background: var(--paper); color: var(--paper-ink); display: flex; align-items: center; padding: 0 16px; font: 700 22px var(--typed); }
+  .field .inp::after { content: ""; width: 2px; height: 26px; background: var(--paper-ink); margin-left: 2px; animation: blink 1s steps(1) infinite; }
+  .field small { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; }
+  .bigtitle { font: 900 56px/0.92 var(--display); text-transform: uppercase; margin: 0; letter-spacing: 0.01em; }
+  .seated { font: 400 14px var(--typed); color: var(--muted); }
+  .seated b { color: var(--text); font-weight: 700; }
+  .kbd { position: absolute; left: 0; right: 0; bottom: 0; height: 290px; background: #2a2723; z-index: 5; padding: 10px 4px 0; display: grid; grid-template-rows: repeat(4, 1fr) 40px; gap: 11px; }
+  .kbd div { display: flex; gap: 6px; justify-content: center; }
+  .kbd i { width: 33px; height: 44px; background: #4b4741; border-radius: 6px; display: block; }
+  .kbd i.w { width: 180px; } .kbd i.m { width: 46px; background: #3a3732; }
+
+  /* invite */
+  .inv { text-align: center; display: flex; flex-direction: column; gap: 16px; }
+  .inv .code { font: 900 128px/0.85 var(--display); letter-spacing: 0.12em; margin-right: -0.12em; }
+  .inv .say { font: 400 14px var(--typed); color: var(--muted); }
+  .qr { width: 218px; height: 218px; background: var(--paper); border-radius: 10px; margin: 0 auto; padding: 14px; }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .url { font: 700 14px var(--typed); background: var(--desk); border-radius: 10px; padding: 14px 12px; word-break: break-all; }
+
+  .struck { margin-top: 40px; }
+  .struck .bigtitle { position: relative; display: inline-block; }
+  .struck .bigtitle::after { content: ""; position: absolute; left: -4px; right: -4px; top: 54%; height: 6px; background: var(--oxblood-lit); transform: rotate(-2deg); }
+  .struck p { color: var(--muted); margin: 14px 0 0; font-size: 16px; }
+  .struck p b { color: var(--text); }
+
+  .alone { background: var(--desk); border-radius: 16px; padding: 18px; display: grid; grid-template-columns: 1fr 112px; gap: 14px; align-items: center; }
+  .alone .c { font: 900 64px/0.9 var(--display); letter-spacing: .1em; }
+  .alone .qr { width: 112px; height: 112px; padding: 8px; border-radius: 8px; }
+  .alone p { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-ledger" viewBox="0 0 24 24"><path d="M6 3.5h10.5A2.5 2.5 0 0 1 19 6v14.5H8.5A2.5 2.5 0 0 1 6 18z"/><path d="M6 18a2.5 2.5 0 0 1 2.5-2.5H19M10 8h5M10 11h3"/></symbol>
+  <symbol id="i-invite" viewBox="0 0 24 24"><circle cx="9.5" cy="8" r="3.5"/><path d="M3 20c0-3.6 2.9-6.5 6.5-6.5S16 16.4 16 20M19 7.5v6M16 10.5h6"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 1 1 9.5 4.5a6 6 0 0 0 10 10z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3.5v11M7.5 8 12 3.5 16.5 8M5 12.5v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17.5 7H20M4 17h3M11.5 17H20"/><circle cx="15.5" cy="7" r="2"/><circle cx="9.5" cy="17" r="2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-replay" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4h4"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+  <symbol id="i-erase" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/></symbol>
+</svg>
+
+<header class="page-head">
+  <div class="rules"></div>
+  <h1>The Ballot Office</h1>
+  <p><b>Sketch for Secret Hitler Voting.</b> Each phone is a ballot card in a dim ministry back room: buff card stock, typed rosters, brass for the one thing you should press, and a rubber stamp for the verdict. JA! and NEIN are printed on identical ballot cards, so the person in the next seat sees paper and nothing else.</p>
+  <p>Fonts: Big Shoulders Display (poster headlines), Libre Franklin (interface copy), Courier Prime (typed names and records). Hold any dashed “Hold to check” bar to try it. The result frames replay the reveal.</p>
+  <div class="swatches" id="swatches"></div>
+</header>
+
+<main class="wall" id="wall"></main>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const ic = (id, cls = '') => `<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+const CODE = 'KXQT';
+
+const statusBar = () => `<div class="sb"><span>21:47</span><span class="isl"></span><span class="r">
+  <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+  <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2.5" y="2.5" width="15" height="8" rx="2" fill="currentColor"/><rect x="25" y="4.5" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div>`;
+
+function phone(inner, { extra = '', cls = '', id = '' } = {}) {
+  return `<div class="phone ${cls}" ${id ? `id="${id}"` : ''}>${statusBar()}<div class="scr">${inner}</div>${extra}<div class="home"></div></div>`;
+}
+function shot(n, label, note, html, after = '') {
+  return `<figure class="shot">${html}<figcaption><div class="lbl"><span>${n}</span>${label}</div><p>${note}</p>${after}</figcaption></figure>`;
+}
+const group = (t) => `<h2 class="group-title">${t}</h2>`;
+
+function header({ conn = 'live' } = {}) {
+  return `<header class="hd"><div class="room"><span class="typed">Room</span><b>${CODE}</b><span class="dot ${conn === 'live' ? '' : 'wait'}" title="${conn === 'live' ? 'Connected' : 'Reconnecting'}"></span></div>
+    <div class="hd-actions"><button class="ib round" aria-label="Ledger">${ic('ledger')}</button><button class="ib">${ic('invite')}Invite</button></div></header>`;
+}
+
+// Players: v = voted, d = dead, off = phone asleep
+const base = () => [
+  { n: 'Sam', me: true }, { n: 'Mei', v: true }, { n: 'Tom' }, { n: 'Priya', v: true },
+  { n: 'Olu', v: true }, { n: 'Hannah', off: true }, { n: 'Kit', d: true },
+];
+function roster(ps, { manage = false } = {}) {
+  const rows = ps.map((p) => {
+    const st = p.d ? `<span class="st">Dead</span>`
+      : p.v ? `<span class="st">${ic('check', 'sm')}Voted</span>`
+      : `<span class="st wait">Waiting</span>`;
+    const acts = `<span class="acts"><button class="mini">${p.d ? 'Revive' : 'Mark dead'}</button><button class="mini danger">Remove</button></span>`;
+    return `<li class="r ${p.d ? 'dead' : ''} ${p.off ? 'offline' : ''}"><span class="nm">${p.n}</span>${p.me ? '<span class="tag">you</span>' : ''}${p.off ? `<span class="off">${ic('moon', 'sm')}asleep</span>` : ''}${manage ? acts : st}</li>`;
+  }).join('');
+  return `<section class="roster"><h2><span>At the table</span><span>${ps.length}</span></h2><ul>${rows}</ul></section>`;
+}
+function progress(ps) {
+  const alive = ps.filter((p) => !p.d);
+  const done = alive.filter((p) => p.v);
+  const wait = alive.filter((p) => !p.v).map((p) => p.me ? '<b>you</b>' : `<b>${p.n}</b>`);
+  const list = wait.length > 1 ? wait.slice(0, -1).join(', ') + ' and ' + wait.at(-1) : wait[0];
+  return `<section class="prog"><div class="count"><b>${done.length}</b><span>of ${alive.length} voted</span></div>
+    <div class="meter">${alive.map((_, i) => `<i class="${i < done.length ? 'on' : ''}"></i>`).join('')}</div>
+    <p class="waiting">${wait.length ? `Waiting for ${list}.` : 'All in. Counting…'}</p></section>`;
+}
+const slip = (w) => `<button class="slip" aria-label="Vote ${w}"><span class="frame"><span class="lock"><span class="word">${w}</span><span class="gloss">(${w === 'JA!' ? 'YES' : 'NO'})</span></span></span></button>`;
+const slips = (round) => `<div class="slips">${slip('JA!', round)}${slip('NEIN', round)}</div>`;
+const manageLink = `<button class="manage-link">${ic('sliders', 'sm')}Manage the table</button>`;
+
+function holdBar(vote, label = 'Hold to check your vote') {
+  return `<button class="hold" data-hold><span class="off">${ic('eye')}${label}</span><span class="on">You voted <b>${vote}</b></span></button>`;
+}
+function envelope(vote, round = 5, held = false) {
+  return `<div class="cast holdable ${held ? 'held' : ''}"><h3>Vote cast.</h3><p>Sealed. Nobody sees it, you included, unless you hold the bar.</p>
+    <div class="env"><div class="back"></div><div class="slip-in"><div class="frame"><div class="w">${vote}</div><div class="gloss">(${vote === 'JA!' ? 'YES' : 'NO'})</div></div></div><div class="front"><span>VOTE ${round} · SEALED</span></div><div class="flap"></div><div class="seal"></div></div>
+    ${holdBar(vote)}</div>`;
+}
+
+// tally marks: groups of five, drawn stroke by stroke
+function tally(n, t0, step) {
+  let out = '', x = 6;
+  for (let i = 0; i < n; i++) {
+    const inGroup = i % 5;
+    const d = `style="animation-delay:${(t0 + i * step - 0.05).toFixed(2)}s"`;
+    if (inGroup === 4) { out += `<line pathLength="1" x1="${x - 34}" y1="26" x2="${x - 2}" y2="8" ${d}/>`; x += 10; }
+    else { out += `<line pathLength="1" x1="${x}" y1="5" x2="${x}" y2="29" ${d}/>`; x += 9; }
+  }
+  const w = Math.max(x, 20);
+  return `<svg class="tally" viewBox="0 0 ${w} 34" style="width:${Math.min(w * 1.5, 120)}px">${out}</svg>`;
+}
+
+// Reveal clock (seconds). The count always fits in COUNT, whatever the table size.
+const T0 = 0.3, COUNT = 0.5, MAXSTEP = 0.13;
+const stepFor = (max) => Math.min(MAXSTEP, COUNT / Math.max(max, 1));
+function result({ ja, nein, round, sub, verdict, ledger, vote }) {
+  const pass = ja > nein;
+  const max = Math.max(ja, nein);
+  const STEP = stepFor(max);
+  const slam = T0 + max * STEP + 0.1;
+  const vars = `--slam:${slam.toFixed(2)}s;--thud:${(slam + 0.15).toFixed(2)}s;--after:${(slam + 0.12).toFixed(2)}s`;
+  return `<div class="res" style="display:contents;${vars}">
+    ${header()}
+    <div class="res-head"><h1>Vote ${round}</h1><p>${sub}</p></div>
+    <div class="sheet" style="${vars}">
+      <div class="col"><span class="lab">JA!</span><span class="num" data-n="${ja}" data-step="${STEP}" data-slam="${slam}">${ja}</span>${tally(ja, T0 + STEP, STEP)}</div>
+      <div class="col"><span class="lab">NEIN</span><span class="num" data-n="${nein}" data-step="${STEP}">${nein}</span>${tally(nein, T0 + STEP, STEP)}</div>
+      <div class="stamp ${pass ? 'pass' : 'fail'}" style="${vars}">${pass ? 'PASSED' : 'FAILED'}</div>
+    </div>
+    <div class="after" style="${vars};display:flex;flex-direction:column;gap:14px">
+      <p class="verdict">${verdict}</p>
+      <div class="holdable" style="margin-top:-14px">${holdBar(vote)}</div>
+      <button class="btn primary">New vote</button>
+      <div class="ledger-strip">${ledger.map((l) => `<div class="lr"><span>Vote ${l[0]}</span><span><b>${l[1]}</b> · ${l[2]}</span></div>`).join('')}
+        <button>${'Open the ledger'}</button></div>
+    </div></div>`;
+}
+const curtain = `<div class="curtain">ALL BALLOTS IN</div>`;
+
+// QR placeholder: seeded modules + finder patterns
+function qr(seed = 7, n = 25) {
+  let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const finder = (x, y) => (x >= 0 && x < 7 && y >= 0 && y < 7);
+  let r = '';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const corners = [[0, 0], [n - 7, 0], [0, n - 7]];
+    let inF = false, on = false;
+    for (const [cx, cy] of corners) if (finder(x - cx, y - cy)) {
+      inF = true; const fx = x - cx, fy = y - cy;
+      on = fx === 0 || fy === 0 || fx === 6 || fy === 6 || (fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4);
+    }
+    const nearF = corners.some(([cx, cy]) => x >= cx - 1 && x <= cx + 7 && y >= cy - 1 && y <= cy + 7);
+    if (!inF) on = !nearF && rnd() > 0.52;
+    if (on) r += `<rect x="${x}" y="${y}" width="1.02" height="1.02"/>`;
+  }
+  return `<svg viewBox="0 0 ${n} ${n}" fill="#1c1813" shape-rendering="crispEdges">${r}</svg>`;
+}
+
+const S = [];
+
+/* ---------------- 1. Landing ---------------- */
+S.push(group('Getting in'));
+S.push(shot('1', 'Landing', 'Masthead like a printed bulletin, with the two ballot cards setting the tone. Creating a room is one brass button. Joining is four letter boxes that fill in like cards; try it: type, backspace, paste a code or a link, or try an I or O.',
+  phone(`<div class="mast"><div class="rules"></div><h1>Secret Hitler<br>Voting</h1><div class="sub"><span>Est. at your table</span><span>No. 1</span></div><div class="rules b"></div></div>
+    <div class="duo">${slip('JA!')}${slip('NEIN')}</div>
+    <p class="lede">One phone each. Vote in secret. Everyone sees the result at the same moment.</p>
+    <button class="btn primary">Open a new room</button>
+    <div class="or">or join one</div>
+    <div class="code-row"><label for="c0">Room code</label><span class="err" aria-live="polite">Codes never use I or O.</span></div>
+    <div class="codebox" data-code>${[0, 1, 2, 3].map((i) => `<input id="c${i}" maxlength="1" placeholder=" " autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Letter ${i + 1} of 4" value="${'KX'[i] || ''}" class="${i === 2 ? 'cur' : ''}">`).join('')}</div>
+    <button class="btn primary join" disabled>Join room</button>
+    <p class="fine">Free. No accounts. No cards to pass round.</p>`)));
+
+/* ---------------- 2. Join ---------------- */
+S.push(shot('2', 'Join room', 'What you land on from the QR code or link. The name field is buff paper, like signing a register. Who is already seated confirms you scanned the right table.',
+  phone(`<header class="hd"><button class="ib round" aria-label="Back">${ic('back')}</button><span></span></header>
+    <h1 class="bigtitle">Room <span style="letter-spacing:.14em">${CODE}</span></h1>
+    <div class="field"><label for="nm">Sign the register</label><div class="inp" id="nm">Sam</div><small>The name the table knows you by. You can change it later.</small></div>
+    <button class="btn primary">Take a seat</button>
+    <p class="seated">Already seated: <b>Mei</b>, <b>Tom</b>, <b>Priya</b>, <b>Olu</b>, <b>Hannah</b>, <b>Kit</b></p>`,
+    { extra: `<div class="kbd"><div>${'<i></i>'.repeat(10)}</div><div>${'<i></i>'.repeat(9)}</div><div><i class="m"></i>${'<i></i>'.repeat(7)}<i class="m"></i></div><div><i class="m"></i><i class="w"></i><i class="m" style="width:88px;background:#c9a24a"></i></div><div></div></div>` })));
+
+/* ---------------- 3. Voting before ---------------- */
+S.push(group('The vote'));
+S.push(shot('3', 'Voting · before you vote', 'Count first, then names. JA! left, NEIN right, on identical ballot cards: same stock, frame and size; only the word differs. Tap casts it; no confirm step, because you can always change it.',
+  phone(header() + progress(base()) + slips(5) + roster(base()) + manageLink)));
+
+/* ---------------- 4. After ---------------- */
+const after = () => base().map((p) => p.me ? { ...p, v: true } : p);
+S.push(shot('4a', 'Voting · vote cast (resting)', 'The card goes into a sealed envelope. It looks exactly the same whichever way you voted. Change and withdraw stay one tap away until the result shows.',
+  phone(header() + progress(after()) + envelope('JA!') + `<div class="row2"><button class="btn ghost">Change vote</button><button class="btn ghost">Withdraw</button></div>` + manageLink)));
+
+S.push(shot('4b', 'Voting · vote cast (holding)', 'While your thumb is down, the seal breaks and your card slides out just far enough to read. Let go and it reseals. Try it on 4a: press and hold the dashed bar.',
+  phone(header() + progress(after()) + envelope('JA!', 5, true) + `<div class="row2"><button class="btn ghost">Change vote</button><button class="btn ghost">Withdraw</button></div>` + manageLink)));
+
+S.push(shot('4c', 'Voting · changing your vote', 'After “Change vote” the cards come back. The sealed vote still counts until you tap a new one, so a slip of the thumb costs nothing.',
+  phone(header() + progress(after()) + `<p class="waiting" style="margin:-6px 0 -8px;color:var(--text)">Pick again. Your sealed vote stands until you do.</p>` + slips(5) + `<p class="hint"><button>Keep my sealed vote</button></p>` + roster(after()).replace('<h2>', '<h2 style="margin-top:4px">'))));
+
+/* ---------------- 5. Dead ---------------- */
+const deadView = () => after().map((p) => p.n === 'Sam' ? { ...p, me: false } : p.n === 'Kit' ? { ...p, me: true } : p);
+S.push(shot('5', 'Dead player’s view', 'A death notice with a mourning border, the old newspaper way. No ballot cards at all, so nothing to tap by mistake. You can still follow the count.',
+  phone(header() + progress(deadView()) + `<div class="notice"><h3>You’re dead.</h3><p>No vote for you this round, or any other. Nobody is waiting on you.</p><p>Try to look innocent anyway.</p><p class="small">Marked dead by mistake? Anyone can revive you under Manage the table.</p></div>` + roster(deadView()))));
+
+/* ---------------- 6. Result ---------------- */
+S.push(group('The reveal'));
+S.push(shot('6a', 'Result · passed', 'Every phone runs this at once, in about 1.5 s. A flash of “ALL BALLOTS IN”, the tally sheet snaps up, both columns count up together one stroke at a time (the shorter one stops first), then the stamp comes down and phones buzz. Tap anywhere to skip to the end.',
+  phone(result({ ja: 4, nein: 2, round: 5, sub: 'All 6 living players voted.', verdict: '<b>4 to 2.</b> The government is elected.', vote: 'JA!', ledger: [[4, '3–3', 'Failed'], [3, '2–3', 'Failed']] }), { id: 'r1', extra: curtain }),
+  `<button class="replay" data-replay="r1">${ic('replay', 'sm')}Replay the reveal</button>`));
+
+S.push(shot('6b', 'Result · failed (tie)', 'Same choreography, oxblood stamp. The line under the sheet says why it failed (a tie) and what that means for the game, so nobody has to ask.',
+  phone(result({ ja: 3, nein: 3, round: 4, sub: 'All 6 living players voted.', verdict: '<b>3 to 3. A tie fails.</b> The election tracker moves.', vote: 'NEIN', ledger: [[3, '2–3', 'Failed'], [2, '5–1', 'Passed']] }), { id: 'r2', extra: curtain }),
+  `<button class="replay" data-replay="r2">${ic('replay', 'sm')}Replay the reveal</button>`));
+
+/* ---------------- 7. Invite ---------------- */
+S.push(group('Room admin'));
+S.push(shot('7', 'Invite', 'Opens from the Invite button. The code is 128px Big Shoulders, readable from across a table. QR on buff paper so phone cameras lock on in dim light.',
+  phone(`<header class="hd"><span class="room"><span class="typed">Invite to the table</span></span><button class="ib round" aria-label="Close">${ic('x')}</button></header>
+    <div class="inv"><div class="code">${CODE}</div><p class="say">Read it out, or point a camera at this.</p>
+    <div class="qr">${qr(11)}</div>
+    <div class="url">secret-hitler-voting.ycmjason.com/${CODE}</div>
+    <div class="row2"><button class="btn ghost">${ic('copy')}Copy link</button><button class="btn primary">${ic('share')}Share</button></div></div>`)));
+
+/* ---------------- 8. Manage ---------------- */
+const manageList = () => after();
+S.push(shot('8a', 'Manage mode', 'One link at the bottom turns the roster into a control panel and the header into a brass bar you can’t miss. Status badges are replaced by actions, so nobody mistakes this for the normal view.',
+  phone(`<div class="manage-bar"><span><b>Managing the table</b><small>Anyone can do this. Be nice.</small></span><button>Done</button></div>`
+    + roster(manageList(), { manage: true })
+    + `<div class="tools"><button class="btn ghost">${ic('flag')}Show result now<small>2 not voted</small></button><button class="btn ghost">${ic('erase')}Clear votes</button><button class="btn ghost">${ic('pen')}Change my name<small>Sam</small></button></div>`)));
+
+S.push(shot('8b', 'Manage · confirm early result', 'Names who hasn’t voted, so the table can shout at them first. Removing a player gets the same kind of sheet.',
+  phone(`<div class="manage-bar"><span><b>Managing the table</b><small>Anyone can do this. Be nice.</small></span><button>Done</button></div>` + roster(manageList(), { manage: true }),
+    { extra: `<div class="dim"></div><div class="bsheet"><div class="grab"></div><h2>Show the result now?</h2><p><b style="color:var(--text)">Tom</b> and <b style="color:var(--text)">Hannah</b> haven’t voted. Their ballots won’t count, and a tie still fails.</p><div style="display:flex;flex-direction:column;gap:10px"><button class="btn primary">Show result now</button><button class="btn ghost">Keep waiting</button></div></div>` })));
+
+/* ---------------- 10. Ledger ---------------- */
+S.push(shot('10', 'Round history: the ledger', 'Lives behind the book icon in the header on every screen, and the last two lines also show under each result. Totals only, like the result itself. Early results are flagged.',
+  phone(header() + progress(after()) + slips(5),
+    { extra: `<div class="dim"></div><div class="bsheet" style="padding-bottom:56px"><div class="grab"></div><h2>Ledger</h2><p>Room ${CODE}, this sitting. Totals only. Nobody’s vote is on record.</p>
+      <ul class="ledger">
+        <li class="now"><span>Vote 5</span><span>in progress · 4 of 6</span><span></span></li>
+        <li><span>Vote 4</span><span><span class="score">3–3</span><span class="why">tie</span></span><span class="mstamp fail">FAILED</span></li>
+        <li><span>Vote 3</span><span><span class="score">2–3</span><span class="why">shown early · 1 missing</span></span><span class="mstamp fail">FAILED</span></li>
+        <li><span>Vote 2</span><span><span class="score">5–1</span></span><span class="mstamp pass">PASSED</span></li>
+        <li><span>Vote 1</span><span><span class="score">4–3</span></span><span class="mstamp pass">PASSED</span></li>
+      </ul></div>` })));
+
+/* ---------------- 9. Small states ---------------- */
+S.push(group('Small states'));
+S.push(shot('9a', 'Reconnecting', 'Amber dot in the header, a plain banner, and everything below greyed out and frozen until the line is back. It says outright that your seat and vote are safe.',
+  phone(header({ conn: 'wait' }) + `<div class="banner"><span class="spinner"></span><span><b>Reconnecting…</b>Your seat and your vote are kept.</span></div><div class="stale" style="display:flex;flex-direction:column;gap:18px">` + progress(after()) + envelope('JA!') + `</div>`)));
+
+S.push(shot('9b', 'Removed from the room', 'Your name gets struck through in red ink. Rejoining takes one tap, since being removed is usually a mistake or a phone swap.',
+  phone(`<div class="struck"><h1 class="bigtitle">Struck off.</h1><p>Someone at table <b>${CODE}</b> removed you. It happens. If it was a mistake, take your seat back.</p></div>
+    <div class="field"><label>Rejoin as</label><div class="inp" style="--x:0">Sam</div></div>
+    <button class="btn primary">Rejoin the table</button>
+    <button class="manage-link" style="margin-top:-6px">Open a new room instead</button>`)));
+
+S.push(shot('9c', 'Empty room, just you', 'The invite moves into the main area until a second person arrives. The ballot cards are hidden, since a vote of one decides nothing.',
+  phone(header() + `<div><h1 class="bigtitle" style="font-size:48px">Just you so far.</h1><p class="waiting" style="margin-top:8px">Votes need voters. Pass the code round the table.</p></div>
+    <div class="alone"><div><div class="c">${CODE}</div><p>secret-hitler-voting<br>.ycmjason.com/${CODE}</p></div><div class="qr">${qr(11)}</div></div>
+    <button class="btn primary">${ic('share')}Share the link</button>` + roster([{ n: 'Sam', me: true }]))));
+
+$('#wall').innerHTML = S.join('');
+
+/* swatches */
+const sw = [['ink', '#14120f'], ['desk', '#1e1b17'], ['text', '#ece3cf'], ['muted', '#a89c86'], ['paper', '#e8dcc2'], ['brass', '#c9a24a'], ['oxblood', '#a3342a'], ['verdigris', '#2c6a4f'], ['kraft', '#7b5e40']];
+$('#swatches').innerHTML = sw.map(([n, h]) => `<span class="sw"><i style="background:${h}"></i>${n} ${h}</span>`).join('');
+
+/* hold to check */
+let held = null;
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('[data-hold]'); if (!b) return;
+  e.preventDefault(); held = b.closest('.holdable'); held.classList.add('held');
+  navigator.vibrate?.(15);
+});
+['pointerup', 'pointercancel', 'blur'].forEach((ev) => window.addEventListener(ev, () => { held?.classList.remove('held'); held = null; }));
+document.addEventListener('contextmenu', (e) => { if (e.target.closest('[data-hold]')) e.preventDefault(); });
+// 4b is a static "held" picture; keep it held
+document.querySelectorAll('.holdable.held').forEach((h) => h.dataset.pinned = 1);
+window.addEventListener('pointerup', () => document.querySelectorAll('[data-pinned]').forEach((h) => h.classList.add('held')));
+
+/* room code entry: four boxes */
+(() => {
+  const box = $('[data-code]'), inputs = [...box.querySelectorAll('input')];
+  const join = $('.join'), err = $('.code-row .err');
+  const OK = /^[A-HJ-NP-Z]$/;            // A–Z without I and O, as the server generates
+  const update = () => { join.disabled = !inputs.every((i) => OK.test(i.value)); };
+  const reject = () => {
+    err.classList.add('show'); box.classList.remove('bad'); void box.offsetWidth; box.classList.add('bad');
+    clearTimeout(reject.t); reject.t = setTimeout(() => err.classList.remove('show'), 1800);
+  };
+  const fill = (letters, from = 0) => {
+    letters.slice(0, 4 - from).forEach((c, k) => { inputs[from + k].value = c; });
+    inputs[Math.min(from + letters.length, 3)].focus();
+  };
+  inputs.forEach((inp, i) => {
+    inp.addEventListener('focus', () => { inputs.forEach((x) => x.classList.remove('cur')); inp.select(); });
+    inp.addEventListener('input', () => {
+      const v = inp.value.toUpperCase().replace(/[^A-Z]/g, '');
+      if (!v) { inp.value = ''; return update(); }
+      if (/[IO]/.test(v)) { inp.value = ''; reject(); return update(); }
+      if (v.length > 1) fill(v.split(''), i); else { inp.value = v; if (i < 3) inputs[i + 1].focus(); }
+      update();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !inp.value && i > 0) { e.preventDefault(); inputs[i - 1].value = ''; inputs[i - 1].focus(); update(); }
+      if (e.key === 'ArrowLeft' && i > 0) inputs[i - 1].focus();
+      if (e.key === 'ArrowRight' && i < 3) inputs[i + 1].focus();
+      if (e.key === 'Enter' && !join.disabled) join.click();
+    });
+    inp.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const t = (e.clipboardData.getData('text') || '').trim().toUpperCase();
+      const m = t.match(/([A-Z]{4})[^A-Z]*$/);      // a bare code, or the end of a room link
+      if (!m) return;
+      if (/[IO]/.test(m[1])) return reject();
+      fill(m[1].split('')); update();
+    });
+  });
+  update();
+})();
+
+/* reveal */
+function stop(ph) {
+  (ph._timers || []).forEach(clearTimeout); ph._timers = [];
+  ph.querySelectorAll('.num').forEach((el) => { clearInterval(el._t); el.textContent = el.dataset.n; });
+}
+function play(id) {
+  const ph = document.getElementById(id);
+  stop(ph);
+  ph.classList.remove('play'); void ph.offsetWidth; ph.classList.add('play');
+  const slam = +ph.querySelector('[data-slam]').dataset.slam;
+  ph._timers.push(setTimeout(() => navigator.vibrate?.([60, 40, 60]), slam * 1000));
+  ph._timers.push(setTimeout(() => { ph._playing = false; }, (slam + 0.5) * 1000));
+  ph._playing = true;
+  ph.querySelectorAll('.num').forEach((el) => {
+    const n = +el.dataset.n, step = +el.dataset.step; let i = 0; el.textContent = '0';
+    if (n > 0) ph._timers.push(setTimeout(() => { el._t = setInterval(() => { i++; el.textContent = i; if (i >= n) clearInterval(el._t); }, step * 1000); }, T0 * 1000));
+  });
+}
+// Tap anywhere during the reveal: jump to the final state (the tap does nothing else).
+document.addEventListener('pointerdown', (e) => {
+  const ph = e.target.closest('.phone'); if (!ph || !ph._playing) return;
+  e.preventDefault(); e.stopPropagation();
+  stop(ph); ph.classList.remove('play'); ph._playing = false; navigator.vibrate?.([60, 40, 60]);
+}, true);
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-replay]'); if (b) play(b.dataset.replay); });
+const io = new IntersectionObserver((es) => es.forEach((en) => { if (en.isIntersecting) { play(en.target.id); io.unobserve(en.target); } }), { threshold: 0.6 });
+['r1', 'r2'].forEach((id) => io.observe(document.getElementById(id)));
+</script>
+</body>
+</html>

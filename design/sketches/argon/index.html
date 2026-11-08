@@ -1,0 +1,2787 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secret Hitler Voting — Design Sketch (argon · Midnight Parliamentary Dossier)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Palette — Midnight Parliamentary Dossier */
+    --bg-void: #0B0A09;
+    --bg-ink: #141210;
+    --bg-dossier: #1D1A16;
+    --bg-dossier-hi: #231F1A;
+    --bg-slip: #26221C;
+    --bg-slip-press: #312B23;
+    --line-subtle: #332E27;
+    --line-rule: #4C4337;
+    --ink-ivory: #EDE3D2;
+    --ink-muted: #9E9382;
+    --ink-faint: #665E52;
+    --brass: #CFA14A;
+    --brass-soft: rgba(207, 161, 74, 0.14);
+    --brass-ink: #18130A;
+    --stamp-pass: #4E9E76;
+    --stamp-pass-bg: #15281F;
+    --stamp-fail: #CC4836;
+    --stamp-fail-bg: #2B1613;
+
+    --font-display: 'Oswald', 'Arial Narrow', Impact, sans-serif;
+    --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-void);
+    color: var(--ink-ivory);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Subtle blueprint / ledger backdrop on the showcase canvas */
+  body {
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(207, 161, 74, 0.06), transparent 55%),
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 48px 48px, 48px 48px;
+    padding-bottom: 96px;
+  }
+
+  /* =========================================================
+     SHOWCASE HEADER & NAVIGATION BAR
+     ========================================================= */
+  .board-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11, 10, 9, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line-subtle);
+    padding: 14px 28px;
+  }
+
+  .board-header-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 1840px;
+    margin: 0 auto;
+  }
+
+  .board-title-group {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .board-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass);
+    border: 1px solid rgba(207, 161, 74, 0.4);
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: var(--brass-soft);
+  }
+
+  .board-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-ivory);
+  }
+
+  .board-subtitle {
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+
+  .board-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .board-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-ivory);
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-rule);
+    padding: 7px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .board-btn:hover {
+    background: var(--bg-slip);
+    border-color: var(--brass);
+  }
+
+  .board-btn.accent {
+    background: var(--brass-soft);
+    border-color: var(--brass);
+    color: var(--brass);
+  }
+
+  .jump-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    max-width: 1840px;
+    margin: 10px auto 0;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .jump-bar::-webkit-scrollbar { display: none; }
+
+  .jump-link {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-decoration: none;
+    padding: 4px 9px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+  }
+
+  .jump-link:hover {
+    color: var(--ink-ivory);
+    background: var(--bg-dossier);
+    border-color: var(--line-subtle);
+  }
+
+  /* Intro brief callout */
+  .board-intro {
+    max-width: 1840px;
+    margin: 24px auto 8px;
+    padding: 0 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .board-note {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-muted);
+    max-width: 920px;
+  }
+
+  .board-note strong {
+    color: var(--ink-ivory);
+    font-weight: 600;
+  }
+
+  .swatch-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-subtle);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .swatch i {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    display: inline-block;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* =========================================================
+     GALLERY STAGE — SIDE-BY-SIDE 390×844 PHONE FRAMES
+     ========================================================= */
+  .stage {
+    max-width: 1840px;
+    margin: 20px auto 0;
+    padding: 0 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px 32px;
+    align-items: flex-start;
+  }
+
+  body.rail-mode .stage {
+    max-width: none;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 32px;
+  }
+
+  .specimen {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 390px;
+    flex-shrink: 0;
+    scroll-margin-top: 116px;
+  }
+
+  .specimen-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 2px;
+  }
+
+  .specimen-id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--brass);
+    text-transform: uppercase;
+  }
+
+  .specimen-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-ivory);
+    margin-left: 6px;
+  }
+
+  .specimen-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  .specimen-mini-btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--brass);
+    background: var(--brass-soft);
+    border: 1px solid rgba(207, 161, 74, 0.45);
+    border-radius: 3px;
+    padding: 2px 7px;
+    cursor: pointer;
+  }
+  .specimen-mini-btn:hover {
+    background: rgba(207, 161, 74, 0.25);
+  }
+
+  .specimen-caption {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ink-muted);
+    min-height: 34px;
+    padding: 0 2px;
+  }
+
+  /* =========================================================
+     EXACT 390×844 PHONE FRAME & INNER APP SYSTEM
+     ========================================================= */
+  .phone {
+    width: 390px;
+    height: 844px;
+    background-color: var(--bg-ink);
+    /* Subtle archival paper & radial lamp vignette */
+    background-image:
+      radial-gradient(ellipse at 50% 12%, rgba(237, 227, 210, 0.035), transparent 65%),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.008) 0px, rgba(255, 255, 255, 0.008) 1px, transparent 1px, transparent 3px);
+    color: var(--ink-ivory);
+    border-radius: 38px;
+    outline: 7px solid #1C1A17;
+    box-shadow:
+      0 0 0 1px #3A342C,
+      0 0 0 8px #2A2621,
+      0 26px 54px rgba(0, 0, 0, 0.72);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Phone system status bar (top safe area) */
+  .sys-bar {
+    height: 36px;
+    padding: 10px 26px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    flex-shrink: 0;
+    z-index: 5;
+  }
+
+  .sys-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .sys-batt {
+    display: inline-block;
+    width: 18px;
+    height: 9px;
+    border: 1px solid var(--ink-muted);
+    border-radius: 2px;
+    padding: 1px;
+    position: relative;
+  }
+  .sys-batt::after {
+    content: '';
+    display: block;
+    width: 72%;
+    height: 100%;
+    background: var(--ink-muted);
+  }
+
+  /* Main scrollable/flex viewport inside 390×844 */
+  .screen-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 18px 14px;
+    gap: 10px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    position: relative;
+  }
+  .screen-body::-webkit-scrollbar { display: none; }
+
+  /* Bottom iOS home indicator */
+  .home-pill {
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .home-pill::after {
+    content: '';
+    width: 124px;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(237, 227, 210, 0.22);
+  }
+
+  /* =========================================================
+     SHARED IN-APP COMPONENTS
+     ========================================================= */
+
+  /* Top Room Bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-subtle);
+    flex-shrink: 0;
+  }
+
+  .room-id-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .room-kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--stamp-pass);
+    box-shadow: 0 0 6px rgba(78, 158, 118, 0.55);
+    display: inline-block;
+  }
+  .dot.warn {
+    background: var(--brass);
+    box-shadow: 0 0 6px rgba(207, 161, 74, 0.55);
+  }
+
+  .room-code-sm {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.05;
+    color: var(--ink-ivory);
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pill-btn {
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-rule);
+    color: var(--ink-ivory);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 7px 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .pill-btn.brass {
+    border-color: rgba(207, 161, 74, 0.55);
+    color: var(--brass);
+    background: rgba(207, 161, 74, 0.09);
+  }
+
+  /* Dossier Status / Progress Card */
+  .dossier-card {
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-subtle);
+    border-top: 2px solid var(--line-rule);
+    border-radius: 6px;
+    padding: 12px 14px;
+    position: relative;
+  }
+
+  .ballot-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-headline {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .progress-count {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-ivory);
+  }
+
+  .progress-pips {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .pip {
+    width: 14px;
+    height: 10px;
+    border: 1px dashed var(--line-rule);
+    border-radius: 2px;
+    background: transparent;
+  }
+
+  .pip.sealed {
+    border: 1px solid var(--brass);
+    background: var(--brass);
+    position: relative;
+  }
+  .pip.sealed::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-top: 1px solid rgba(24, 19, 10, 0.55);
+  }
+
+  .waiting-line {
+    margin-top: 6px;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--ink-muted);
+  }
+  .waiting-line strong {
+    color: var(--ink-ivory);
+    font-weight: 500;
+  }
+
+  /* =========================================================
+     IDENTICAL JA! / NEIN BALLOT SLIPS (ANTI-PEEK)
+     ========================================================= */
+  .ballot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* Strictly identical styling for JA! (left) and NEIN (right) */
+  .ballot-slip {
+    background: var(--bg-slip);
+    color: var(--ink-ivory);
+    border: 1px solid var(--line-rule);
+    border-radius: 6px;
+    min-height: 148px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+    box-shadow:
+      inset 0 0 0 3px var(--bg-slip),
+      inset 0 0 0 4px rgba(237, 227, 210, 0.14),
+      0 6px 16px rgba(0, 0, 0, 0.35);
+    transition: transform 0.08s ease, background 0.12s ease;
+  }
+
+  .ballot-slip:active {
+    transform: scale(0.975);
+    background: var(--bg-slip-press);
+  }
+
+  .slip-reg {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  .slip-word {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: var(--ink-ivory);
+  }
+
+  .slip-rule {
+    width: 36px;
+    height: 1px;
+    background: var(--line-rule);
+  }
+
+  .ballot-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin: -2px 0 2px;
+  }
+
+  /* =========================================================
+     SEALED VOTE & SECURITY SHUTTER ("HOLD TO CHECK")
+     ========================================================= */
+  .sealed-box {
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-rule);
+    border-radius: 6px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .sealed-stamp-line {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .sealed-sub {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: -6px;
+  }
+
+  /* Security-envelope hatch button for Hold-to-Check */
+  .peek-shutter {
+    background-color: var(--bg-slip);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(237, 227, 210, 0.035) 0px,
+      rgba(237, 227, 210, 0.035) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+    border: 1px solid var(--line-rule);
+    border-radius: 5px;
+    min-height: 54px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    touch-action: none;
+    transition: background-color 0.1s, border-color 0.1s;
+  }
+
+  .peek-shutter .peek-main {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-ivory);
+  }
+
+  .peek-shutter .peek-micro {
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+
+  /* Held / Active state — strictly neutral ivory/charcoal so zero red/green glow leaks! */
+  .peek-shutter.is-peeking {
+    background-color: #110F0D;
+    background-image: none;
+    border-color: var(--ink-ivory);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.85);
+  }
+
+  .peek-shutter.is-peeking .peek-main {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    color: var(--ink-ivory);
+  }
+
+  .peek-shutter.is-peeking .peek-micro {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .btn-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .btn-secondary {
+    background: var(--bg-slip);
+    border: 1px solid var(--line-subtle);
+    color: var(--ink-ivory);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .btn-secondary:active {
+    background: var(--bg-slip-press);
+  }
+
+  .btn-primary {
+    background: var(--brass);
+    color: var(--brass-ink);
+    border: 1px solid #DFB560;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    min-height: 52px;
+    padding: 12px 16px;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+
+  /* =========================================================
+     PLAYER ROLL (LIST)
+     ========================================================= */
+  .roll-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .roll-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 2px;
+  }
+
+  .player-roll {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 12px;
+    min-height: 34px;
+    border-top: 1px solid var(--line-subtle);
+    font-size: 13.5px;
+  }
+  .player-roll.manage-roll .player-row {
+    padding: 7px 12px;
+    min-height: 44px;
+  }
+  .player-row:first-child {
+    border-top: 0;
+  }
+
+  .p-ident {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .p-name {
+    font-weight: 500;
+    color: var(--ink-ivory);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .p-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .p-tag.you {
+    color: var(--brass);
+    background: var(--brass-soft);
+  }
+
+  .p-tag.offline {
+    color: var(--ink-muted);
+    border: 1px dashed var(--line-rule);
+    background: transparent;
+  }
+
+  .player-row.is-offline .p-name {
+    color: var(--ink-muted);
+  }
+
+  .player-row.is-dead .p-name {
+    text-decoration: line-through;
+    color: var(--ink-faint);
+  }
+
+  .status-stamp {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .status-stamp.sealed {
+    color: var(--brass-ink);
+    background: var(--brass);
+  }
+
+  .status-stamp.waiting {
+    color: var(--ink-muted);
+    border: 1px dashed var(--line-rule);
+  }
+
+  .status-stamp.dead {
+    color: var(--ink-faint);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* =========================================================
+     FOOTER: COLLAPSIBLE ROUND HISTORY & MANAGE LINK
+     ========================================================= */
+  .screen-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 4px;
+  }
+
+  .history-bar {
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-subtle);
+    border-radius: 5px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    cursor: pointer;
+  }
+
+  .history-bar strong {
+    color: var(--ink-ivory);
+    font-weight: 500;
+  }
+
+  .manage-trigger {
+    background: none;
+    border: 0;
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 4px;
+    align-self: center;
+    cursor: pointer;
+  }
+
+  /* =========================================================
+     RESULT SCREEN & WET-INK STAMP ANIMATION
+     ========================================================= */
+  .verdict-stage {
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-rule);
+    border-radius: 6px;
+    padding: 16px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tally-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .tally-slip {
+    background: var(--bg-slip);
+    border: 1px solid var(--line-rule);
+    border-radius: 5px;
+    padding: 12px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tally-num {
+    font-family: var(--font-display);
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 0.95;
+    color: var(--ink-ivory);
+  }
+
+  .tally-lbl {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--ink-muted);
+  }
+
+  .tally-dots {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    min-height: 6px;
+  }
+
+  .tally-dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--ink-muted);
+    display: inline-block;
+  }
+
+  .rubber-stamp-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0 2px;
+  }
+
+  .rubber-stamp {
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    padding: 10px 26px;
+    border-radius: 4px;
+    position: relative;
+  }
+
+  .rubber-stamp.pass {
+    --tilt: -2deg;
+    color: var(--stamp-pass);
+    background: var(--stamp-pass-bg);
+    border: 3px solid var(--stamp-pass);
+    box-shadow:
+      inset 0 0 0 2px var(--stamp-pass-bg),
+      inset 0 0 0 3px rgba(78, 158, 118, 0.55),
+      0 6px 20px rgba(21, 40, 31, 0.8);
+    transform: rotate(var(--tilt));
+  }
+
+  .rubber-stamp.fail {
+    --tilt: 1.8deg;
+    color: var(--stamp-fail);
+    background: var(--stamp-fail-bg);
+    border: 3px solid var(--stamp-fail);
+    box-shadow:
+      inset 0 0 0 2px var(--stamp-fail-bg),
+      inset 0 0 0 3px rgba(204, 72, 54, 0.55),
+      0 6px 20px rgba(43, 22, 19, 0.8);
+    transform: rotate(var(--tilt));
+  }
+
+  .verdict-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* 3-Beat Reveal Choreography Classes (triggered on replay) */
+  .suspense-banner {
+    display: none;
+    padding: 28px 12px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  .phone.anim-beat-1 .suspense-banner {
+    display: block;
+    animation: pulseFade 0.26s ease-in-out;
+  }
+  .phone.anim-beat-1 .tally-cards,
+  .phone.anim-beat-1 .rubber-stamp-wrap {
+    opacity: 0;
+  }
+
+  .phone.anim-beat-2 .tally-cards {
+    animation: slipUnfold 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .phone.anim-beat-2 .rubber-stamp-wrap {
+    opacity: 0;
+  }
+
+  .phone.anim-beat-3 {
+    animation: tableThud 0.22s ease-out;
+  }
+  .phone.anim-beat-3 .rubber-stamp {
+    animation: stampSlam 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes pulseFade {
+    from { opacity: 0.3; }
+    to { opacity: 1; }
+  }
+  @keyframes slipUnfold {
+    from { opacity: 0; transform: scaleY(0.84) translateY(-6px); }
+    to { opacity: 1; transform: scaleY(1) translateY(0); }
+  }
+  @keyframes stampSlam {
+    0% { opacity: 0; transform: scale(1.45) rotate(0deg); }
+    75% { opacity: 1; transform: scale(0.97) rotate(var(--tilt, -2deg)); }
+    100% { opacity: 1; transform: scale(1) rotate(var(--tilt, -2deg)); }
+  }
+  @keyframes tableThud {
+    0% { transform: translateY(0); }
+    35% { transform: translateY(2.5px); }
+    100% { transform: translateY(0); }
+  }
+
+  /* =========================================================
+     LANDING & JOIN SCREENS
+     ========================================================= */
+  .brand-crest {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 22px 8px 10px;
+    gap: 8px;
+  }
+
+  .crest-svg {
+    width: 54px;
+    height: 54px;
+    color: var(--brass);
+  }
+
+  .brand-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.05;
+  }
+
+  .brand-tagline {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--ink-muted);
+    max-width: 290px;
+    margin: 0;
+  }
+
+  .or-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 4px 0;
+  }
+  .or-divider::before,
+  .or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line-subtle);
+  }
+
+  .code-slots {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .code-slot {
+    height: 62px;
+    background: var(--bg-ink);
+    border: 1px solid var(--line-rule);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ink-ivory);
+  }
+  .code-slot.active {
+    border-color: var(--brass);
+    box-shadow: 0 0 0 2px rgba(207, 161, 74, 0.2);
+  }
+  .code-slot.empty {
+    color: var(--ink-faint);
+  }
+
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .text-input-mock {
+    background: var(--bg-ink);
+    border: 1px solid var(--brass);
+    box-shadow: 0 0 0 2px rgba(207, 161, 74, 0.16);
+    border-radius: 5px;
+    padding: 14px 14px;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink-ivory);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .caret {
+    display: inline-block;
+    width: 2px;
+    height: 20px;
+    background: var(--brass);
+    margin-left: 2px;
+    vertical-align: middle;
+  }
+
+  /* =========================================================
+     DEAD VIEW, INVITE, MANAGE MODE, SMALL STATES & HISTORY
+     ========================================================= */
+  .dead-notice {
+    background: rgba(29, 26, 22, 0.7);
+    border: 1px dashed var(--line-rule);
+    border-radius: 6px;
+    padding: 22px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dead-stamp {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    border: 2px solid var(--line-rule);
+    padding: 5px 16px;
+    border-radius: 3px;
+    transform: rotate(-1.5deg);
+  }
+
+  /* Invite Sheet */
+  .sheet-backdrop {
+    background: var(--bg-dossier);
+    border: 1px solid var(--line-rule);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+  }
+
+  .big-room-plaque {
+    background: var(--bg-ink);
+    border: 1px solid var(--brass);
+    border-radius: 6px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+
+  .big-room-code {
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    padding-left: 0.18em;
+    line-height: 1;
+    color: var(--ink-ivory);
+  }
+
+  .qr-ticket {
+    background: var(--ink-ivory);
+    color: var(--bg-ink);
+    padding: 14px;
+    border-radius: 6px;
+    width: 196px;
+    height: 196px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Manage Mode Controls */
+  .manage-banner {
+    background: rgba(207, 161, 74, 0.12);
+    border: 1px solid var(--brass);
+    border-radius: 5px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--brass);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .row-tools {
+    display: flex;
+    gap: 5px;
+  }
+
+  .mini-act {
+    background: var(--bg-slip);
+    border: 1px solid var(--line-rule);
+    color: var(--ink-ivory);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .mini-act.danger {
+    color: #E58577;
+    border-color: rgba(204, 72, 54, 0.45);
+  }
+  .mini-act.revive {
+    color: var(--brass);
+    border-color: rgba(207, 161, 74, 0.5);
+  }
+
+  .confirm-box {
+    background: var(--stamp-fail-bg);
+    border: 1px solid var(--stamp-fail);
+    border-radius: 5px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .confirm-text {
+    font-size: 12px;
+    color: var(--ink-ivory);
+    line-height: 1.35;
+  }
+
+  /* Reconnect banner */
+  .reconnect-strip {
+    background: rgba(207, 161, 74, 0.16);
+    border: 1px solid var(--brass);
+    border-radius: 5px;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12px;
+    color: var(--ink-ivory);
+  }
+
+  /* History Log Table */
+  .ledger-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--line-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-ink);
+  }
+
+  .ledger-item {
+    display: grid;
+    grid-template-columns: 66px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 12px;
+    border-top: 1px solid var(--line-subtle);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .ledger-item:first-child { border-top: 0; }
+
+  .ledger-round {
+    color: var(--ink-muted);
+    font-weight: 500;
+  }
+
+  .ledger-score {
+    color: var(--ink-ivory);
+    font-weight: 600;
+  }
+  .ledger-score span {
+    color: var(--ink-faint);
+    font-weight: 400;
+    font-size: 10px;
+    margin-left: 4px;
+  }
+
+  .ledger-outcome {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .ledger-outcome.pass {
+    color: var(--stamp-pass);
+    background: var(--stamp-pass-bg);
+    border: 1px solid rgba(78, 158, 118, 0.45);
+  }
+  .ledger-outcome.fail {
+    color: var(--stamp-fail);
+    background: var(--stamp-fail-bg);
+    border: 1px solid rgba(204, 72, 54, 0.45);
+  }
+
+  .mock-toast {
+    background: var(--ink-ivory);
+    color: var(--bg-ink);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 99px;
+    align-self: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  }
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     STICKY SPECIMEN HEADER
+     ========================================================= -->
+<header class="board-header">
+  <div class="board-header-top">
+    <div class="board-title-group">
+      <span class="board-kicker">Sketch · argon</span>
+      <h1 class="board-title">Secret Hitler Voting — "Midnight Parliamentary Dossier"</h1>
+      <span class="board-subtitle">14 frames · 390×844 CSS px · Static HTML + interactive peek &amp; reveal</span>
+    </div>
+    <div class="board-controls">
+      <button class="board-btn accent" type="button" id="replayAllBtn">↻ Replay Reveal Animation (06A &amp; 06B)</button>
+      <button class="board-btn" type="button" id="layoutToggleBtn">Layout: Wrapped Rows ⇄ Single Rail</button>
+    </div>
+  </div>
+  <nav class="jump-bar" aria-label="Jump to screen">
+    <a class="jump-link" href="#s01">01 Landing</a>
+    <a class="jump-link" href="#s02">02 Join Room</a>
+    <a class="jump-link" href="#s03">03 Before Vote</a>
+    <a class="jump-link" href="#s04a">04A Vote Cast (Resting)</a>
+    <a class="jump-link" href="#s04b">04B Vote Cast (Held)</a>
+    <a class="jump-link" href="#s05">05 Dead View</a>
+    <a class="jump-link" href="#s06a">06A Result: Passed</a>
+    <a class="jump-link" href="#s06b">06B Result: Failed (Tie)</a>
+    <a class="jump-link" href="#s07">07 Invite &amp; QR</a>
+    <a class="jump-link" href="#s08">08 Manage Mode</a>
+    <a class="jump-link" href="#s09a">09A Reconnecting</a>
+    <a class="jump-link" href="#s09b">09B Removed / Rejoin</a>
+    <a class="jump-link" href="#s09c">09C Empty Room</a>
+    <a class="jump-link" href="#s10">10 Round History</a>
+  </nav>
+</header>
+
+<section class="board-intro">
+  <div class="board-note">
+    <strong>Anti-peek &amp; table-light discipline:</strong> During active voting, every screen stays strictly neutral lampblack, walnut, and aged ivory—<strong>JA!</strong> (left) and <strong>NEIN</strong> (right) share identical size, stock, and ink, and holding the security shutter reveals your ballot in monochrome so screen light on faces or glasses never betrays a colour. Saturated <strong>Verdigris</strong> and <strong>Censor Vermilion</strong> ink appear only on the simultaneous public reveal and anonymous round ledger. <em>Try pressing and holding any "Hold to check" bar below, or click Replay Reveal.</em>
+  </div>
+  <div class="swatch-row">
+    <span class="swatch"><i style="background:#141210"></i>#141210 Ink</span>
+    <span class="swatch"><i style="background:#1D1A16"></i>#1D1A16 Dossier</span>
+    <span class="swatch"><i style="background:#26221C"></i>#26221C Slip</span>
+    <span class="swatch"><i style="background:#EDE3D2"></i>#EDE3D2 Ivory</span>
+    <span class="swatch"><i style="background:#CFA14A"></i>#CFA14A Brass</span>
+    <span class="swatch"><i style="background:#4E9E76"></i>#4E9E76 Pass</span>
+    <span class="swatch"><i style="background:#CC4836"></i>#CC4836 Fail</span>
+  </div>
+</section>
+
+<!-- =========================================================
+     14 PHONE FRAMES (390×844 CSS PX EACH)
+     ========================================================= -->
+<main class="stage">
+
+  <!-- =======================================================
+       01 · LANDING
+       ======================================================= -->
+  <section class="specimen" id="s01">
+    <div class="specimen-head">
+      <div><span class="specimen-id">01</span><span class="specimen-name">Landing</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">Create a fresh room in one tap, or punch in a 4-letter table code read across the room.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:11</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body" style="justify-content: space-between;">
+        <div class="brand-crest">
+          <!-- Original geometric ballot-box SVG emblem (no game art, no political symbols) -->
+          <svg class="crest-svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="10" y="28" width="44" height="28" rx="2" fill="#1D1A16"/>
+            <line x1="6" y1="28" x2="58" y2="28" stroke-width="2.5"/>
+            <line x1="21" y1="33" x2="43" y2="33" stroke-width="2.5"/>
+            <path d="M23 32V10H41V32" fill="#26221C"/>
+            <line x1="27" y1="17" x2="37" y2="17" stroke-opacity="0.6"/>
+            <line x1="27" y1="22" x2="35" y2="22" stroke-opacity="0.6"/>
+          </svg>
+          <div class="room-kicker">CHANCELLERY ELECTION DESK</div>
+          <h2 class="brand-title">Secret Ballot</h2>
+          <p class="brand-tagline">Cast JA! and NEIN on your own phones. Totals reveal at the exact same moment.</p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="dossier-card" style="display:flex; flex-direction:column; gap:10px;">
+            <div class="ballot-meta-row"><span>NEW TABLE</span><span>NO SIGN-UP</span></div>
+            <button class="btn-primary" type="button">Open a New Room →</button>
+            <div style="font-size:12px; color:var(--ink-muted); text-align:center;">Generates a 4-letter room code &amp; QR link for your table.</div>
+          </div>
+
+          <div class="or-divider">Or join an existing table</div>
+
+          <div class="dossier-card" style="display:flex; flex-direction:column; gap:12px;">
+            <div class="field-label"><span>4-Letter Room Code</span><span>A–Z</span></div>
+            <div class="code-slots" aria-label="Room code input">
+              <div class="code-slot">K</div>
+              <div class="code-slot">R</div>
+              <div class="code-slot active">V<span class="caret"></span></div>
+              <div class="code-slot empty">·</div>
+            </div>
+            <button class="btn-secondary" type="button" style="min-height:48px; font-family:var(--font-display); font-size:16px; letter-spacing:0.08em; text-transform:uppercase;">Join Room</button>
+          </div>
+        </div>
+
+        <div style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--ink-faint); letter-spacing:0.06em;">
+          secret-hitler-voting.ycmjason.com · ANONYMOUS BY DESIGN
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       02 · JOIN ROOM
+       ======================================================= -->
+  <section class="specimen" id="s02">
+    <div class="specimen-head">
+      <div><span class="specimen-id">02</span><span class="specimen-name">Join Room</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">Opened via QR scan or shared link: confirms the room code and asks for your table name.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:12</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>JOINING TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <button class="pill-btn" type="button">← Switch Room</button>
+        </div>
+
+        <div style="margin-top: 38px; display:flex; flex-direction:column; gap:16px;">
+          <div class="dossier-card" style="padding:18px 16px; display:flex; flex-direction:column; gap:14px;">
+            <div class="ballot-meta-row">
+              <span>SEAT REGISTRATION</span>
+              <span>6 ALREADY SEATED</span>
+            </div>
+            <h2 style="margin:0; font-family:var(--font-display); font-size:28px; letter-spacing:0.05em; text-transform:uppercase;">What's your name at the table?</h2>
+            <p style="margin:-6px 0 2px; font-size:13px; color:var(--ink-muted); line-height:1.45;">
+              Use the name your friends will shout across the table when a vote goes sideways.
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div class="field-label"><span>Your Name</span><span>5 / 24</span></div>
+              <div class="text-input-mock">
+                <span>Clara<span class="caret"></span></span>
+                <span style="font-family:var(--font-mono); font-size:11px; color:var(--ink-faint);">✕</span>
+              </div>
+            </div>
+
+            <button class="btn-primary" type="button" style="margin-top:4px;">Take Your Seat</button>
+          </div>
+
+          <div style="padding:0 6px; font-size:12px; color:var(--ink-faint); text-align:center; line-height:1.5;">
+            Your vote is never shown next to your name—only whether you've dropped a ballot in the box.
+          </div>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       03 · VOTING, BEFORE YOU VOTE
+       ======================================================= -->
+  <section class="specimen" id="s03">
+    <div class="specimen-head">
+      <div><span class="specimen-id">03</span><span class="specimen-name">Voting · Before You Vote</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">Identical JA! (left) and NEIN (right) slips, live progress pips, waiting callout, and player roll.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:14</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn" type="button">№ 04 · Log (3)</button>
+            <button class="pill-btn brass" type="button">+ Invite</button>
+          </div>
+        </div>
+
+        <div class="dossier-card">
+          <div class="ballot-meta-row">
+            <span>BALLOT № 04 · IN SESSION</span>
+            <span>7 ELIGIBLE</span>
+          </div>
+          <div class="progress-headline">
+            <span class="progress-count">3 / 7 Voted</span>
+            <div class="progress-pips" aria-hidden="true">
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+            </div>
+          </div>
+          <div class="waiting-line">Waiting on <strong>Clara (you), Felix, Greta, Lukas</strong></div>
+        </div>
+
+        <div class="ballot-grid" role="group" aria-label="Cast secret ballot">
+          <button class="ballot-slip" type="button" data-demo-vote="JA!">
+            <span class="slip-reg"><span>┌</span><span>BALLOT</span><span>┐</span></span>
+            <span class="slip-word">JA!</span>
+            <span class="slip-rule"></span>
+            <span class="slip-reg"><span>└</span><span>SECRET</span><span>┘</span></span>
+          </button>
+          <button class="ballot-slip" type="button" data-demo-vote="NEIN">
+            <span class="slip-reg"><span>┌</span><span>BALLOT</span><span>┐</span></span>
+            <span class="slip-word">NEIN</span>
+            <span class="slip-rule"></span>
+            <span class="slip-reg"><span>└</span><span>SECRET</span><span>┘</span></span>
+          </button>
+        </div>
+        <div class="ballot-hint" id="demoVoteHint">Anonymous — only the totals appear once all 7 living players vote.</div>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>SEATED ROLL (8)</span><span>BALLOT STATUS</span></div>
+          <ul class="player-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Maren</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Dietrich</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Felix</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Greta</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row is-offline">
+              <span class="p-ident"><span class="p-name">Lukas</span><span class="p-tag offline">offline</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Oskar</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Hannah</span></span>
+              <span class="status-stamp dead">Dead</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="screen-footer">
+          <div class="history-bar">
+            <span>Past Ballots (3)</span>
+            <span>Last: <strong>№ 03 · 5–2 · Passed</strong> ▾</span>
+          </div>
+          <button class="manage-trigger" type="button">Manage table (mark dead, reveal early, remove)</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       04A · VOTING, AFTER YOU VOTE (RESTING)
+       ======================================================= -->
+  <section class="specimen" id="s04a">
+    <div class="specimen-head">
+      <div><span class="specimen-id">04A</span><span class="specimen-name">After Vote · Resting</span></div>
+      <span class="specimen-tag">Interactive Hold</span>
+    </div>
+    <div class="specimen-caption">Vote is hidden immediately. Press &amp; hold the security strip below to test live peek behaviour.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:14</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn" type="button">№ 04 · Log (3)</button>
+            <button class="pill-btn brass" type="button">+ Invite</button>
+          </div>
+        </div>
+
+        <div class="dossier-card">
+          <div class="ballot-meta-row">
+            <span>BALLOT № 04 · IN SESSION</span>
+            <span>7 ELIGIBLE</span>
+          </div>
+          <div class="progress-headline">
+            <span class="progress-count">4 / 7 Voted</span>
+            <div class="progress-pips">
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+            </div>
+          </div>
+          <div class="waiting-line">Waiting on <strong>Felix, Greta, Lukas</strong></div>
+        </div>
+
+        <div class="sealed-box">
+          <div class="sealed-stamp-line">✓ Ballot Sealed</div>
+          <div class="sealed-sub">Dropped in the box. Eyes across the table.</div>
+
+          <div class="peek-shutter" data-peek="NEIN" tabindex="0" role="button" aria-label="Hold to check your vote">
+            <span class="peek-main">⦿ Hold to check your vote</span>
+            <span class="peek-micro">Hides the instant your thumb lets go</span>
+          </div>
+
+          <div class="btn-pair">
+            <button class="btn-secondary" type="button">Change vote</button>
+            <button class="btn-secondary" type="button">Withdraw</button>
+          </div>
+        </div>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>SEATED ROLL (8)</span><span>BALLOT STATUS</span></div>
+          <ul class="player-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Maren</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Dietrich</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Felix</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Greta</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row is-offline">
+              <span class="p-ident"><span class="p-name">Lukas</span><span class="p-tag offline">offline</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Oskar</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Hannah</span></span>
+              <span class="status-stamp dead">Dead</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="screen-footer">
+          <div class="history-bar">
+            <span>Past Ballots (3)</span>
+            <span>Last: <strong>№ 03 · 5–2 · Passed</strong> ▾</span>
+          </div>
+          <button class="manage-trigger" type="button">Manage table (mark dead, reveal early, remove)</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       04B · VOTING, AFTER YOU VOTE (HELD STATE)
+       ======================================================= -->
+  <section class="specimen" id="s04b">
+    <div class="specimen-head">
+      <div><span class="specimen-id">04B</span><span class="specimen-name">After Vote · Held to Check</span></div>
+      <span class="specimen-tag">Pinned State</span>
+    </div>
+    <div class="specimen-caption">While thumb holds the shutter: neutral ivory on soot black—no green/red glow on glasses or skin.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:14</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn" type="button">№ 04 · Log (3)</button>
+            <button class="pill-btn brass" type="button">+ Invite</button>
+          </div>
+        </div>
+
+        <div class="dossier-card">
+          <div class="ballot-meta-row">
+            <span>BALLOT № 04 · IN SESSION</span>
+            <span>7 ELIGIBLE</span>
+          </div>
+          <div class="progress-headline">
+            <span class="progress-count">4 / 7 Voted</span>
+            <div class="progress-pips">
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+            </div>
+          </div>
+          <div class="waiting-line">Waiting on <strong>Felix, Greta, Lukas</strong></div>
+        </div>
+
+        <div class="sealed-box">
+          <div class="sealed-stamp-line">✓ Ballot Sealed</div>
+          <div class="sealed-sub">Dropped in the box. Eyes across the table.</div>
+
+          <div class="peek-shutter is-peeking" aria-label="Held state showing vote">
+            <span class="peek-main">You voted: NEIN</span>
+            <span class="peek-micro">Release thumb to conceal</span>
+          </div>
+
+          <div class="btn-pair">
+            <button class="btn-secondary" type="button">Change vote</button>
+            <button class="btn-secondary" type="button">Withdraw</button>
+          </div>
+        </div>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>SEATED ROLL (8)</span><span>BALLOT STATUS</span></div>
+          <ul class="player-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Maren</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Dietrich</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Felix</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Greta</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row is-offline">
+              <span class="p-ident"><span class="p-name">Lukas</span><span class="p-tag offline">offline</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Oskar</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Hannah</span></span>
+              <span class="status-stamp dead">Dead</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="screen-footer">
+          <div class="history-bar">
+            <span>Past Ballots (3)</span>
+            <span>Last: <strong>№ 03 · 5–2 · Passed</strong> ▾</span>
+          </div>
+          <button class="manage-trigger" type="button">Manage table (mark dead, reveal early, remove)</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       05 · DEAD PLAYER'S VIEW
+       ======================================================= -->
+  <section class="specimen" id="s05">
+    <div class="specimen-head">
+      <div><span class="specimen-id">05</span><span class="specimen-name">Dead Player's View</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">Eliminated players watch live ballot progress without blocking the reveal, with a quick shortcut if marked by mistake.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:15</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn" type="button">№ 04 · Log (3)</button>
+            <button class="pill-btn brass" type="button">+ Invite</button>
+          </div>
+        </div>
+
+        <div class="dossier-card">
+          <div class="ballot-meta-row">
+            <span>BALLOT № 04 · IN SESSION</span>
+            <span>SPECTATING</span>
+          </div>
+          <div class="progress-headline">
+            <span class="progress-count">5 / 7 Voted</span>
+            <div class="progress-pips">
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+            </div>
+          </div>
+          <div class="waiting-line">Waiting on <strong>Felix, Greta</strong></div>
+        </div>
+
+        <div class="dead-notice">
+          <div class="dead-stamp">Eliminated · No Ballot</div>
+          <div style="font-size:13px; color:var(--ink-ivory); font-weight:500; margin-top:2px;">
+            You're marked dead, so nobody is waiting on you.
+          </div>
+          <div style="font-size:12px; color:var(--ink-muted); line-height:1.45; max-width:280px;">
+            The dead don't vote—and shouldn't give speeches, either. Your screen will still reveal the tally with everyone else.
+          </div>
+        </div>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>SEATED ROLL (8)</span><span>BALLOT STATUS</span></div>
+          <ul class="player-roll">
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Hannah</span><span class="p-tag you">you</span></span>
+              <span class="status-stamp dead">Dead</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Maren</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Dietrich</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Felix</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Greta</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row is-offline">
+              <span class="p-ident"><span class="p-name">Lukas</span><span class="p-tag offline">offline</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Oskar</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="screen-footer">
+          <div class="history-bar">
+            <span>Past Ballots (3)</span>
+            <span>Last: <strong>№ 03 · 5–2 · Passed</strong> ▾</span>
+          </div>
+          <button class="manage-trigger" type="button">Marked dead by mistake? Manage table</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       06A · RESULT — PASSED
+       ======================================================= -->
+  <section class="specimen" id="s06a">
+    <div class="specimen-head">
+      <div><span class="specimen-id">06A</span><span class="specimen-name">Result · Passed</span></div>
+      <button class="specimen-mini-btn" type="button" data-replay-target="phone06a">↻ Replay Reveal</button>
+    </div>
+    <div class="specimen-caption">Simultaneous table reveal: numbers unfold first (260ms), then the tilted Verdigris stamp slams down (620ms).</div>
+    <div class="phone" id="phone06a">
+      <div class="sys-bar"><span>23:16</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn" type="button">№ 04 · Log (4)</button>
+            <button class="pill-btn brass" type="button">+ Invite</button>
+          </div>
+        </div>
+
+        <div class="verdict-stage">
+          <div class="ballot-meta-row" style="margin-bottom:0;">
+            <span>BALLOT № 04 · OFFICIAL TALLY</span>
+            <span>7 BALLOTS COUNTED</span>
+          </div>
+
+          <div class="suspense-banner">All 7 Ballots Sealed — Counting…</div>
+
+          <div class="tally-cards">
+            <div class="tally-slip">
+              <span class="tally-num">5</span>
+              <span class="tally-lbl">JA!</span>
+              <span class="tally-dots"><i></i><i></i><i></i><i></i><i></i></span>
+            </div>
+            <div class="tally-slip">
+              <span class="tally-num">2</span>
+              <span class="tally-lbl">NEIN</span>
+              <span class="tally-dots"><i></i><i></i></span>
+            </div>
+          </div>
+
+          <div class="rubber-stamp-wrap">
+            <div class="rubber-stamp pass">Passed</div>
+            <div class="verdict-sub">Majority in favour (5 to 2) · Government elected</div>
+          </div>
+
+          <div class="peek-shutter" data-peek="JA!" tabindex="0" role="button" aria-label="Hold to check your vote">
+            <span class="peek-main">⦿ Hold to check your vote</span>
+            <span class="peek-micro">Individual votes are never revealed</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" type="button">New Vote (Ballot № 05)</button>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>PARTICIPATING SEATS (7 ALIVE, 1 DEAD)</span><span>ANONYMOUS</span></div>
+          <ul class="player-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="p-tag">counted</span>
+            </li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Maren</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Dietrich</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Felix</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Greta</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Oskar</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row is-offline">
+              <span class="p-ident"><span class="p-name">Lukas</span><span class="p-tag offline">offline</span></span>
+              <span class="p-tag">counted</span>
+            </li>
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Hannah</span></span>
+              <span class="status-stamp dead">Dead</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="screen-footer">
+          <div class="history-bar">
+            <span>Past Ballots (4)</span>
+            <span>Logged: <strong>№ 04 · 5–2 · Passed</strong> ▾</span>
+          </div>
+          <button class="manage-trigger" type="button">Manage table (mark dead, remove)</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       06B · RESULT — FAILED (TIE)
+       ======================================================= -->
+  <section class="specimen" id="s06b">
+    <div class="specimen-head">
+      <div><span class="specimen-id">06B</span><span class="specimen-name">Result · Failed (Tie)</span></div>
+      <button class="specimen-mini-btn" type="button" data-replay-target="phone06b">↻ Replay Reveal</button>
+    </div>
+    <div class="specimen-caption">Tie outcome (3–3 after another assassination): Censor Vermilion stamp explicitly notes ties fail.</div>
+    <div class="phone" id="phone06b">
+      <div class="sys-bar"><span>23:21</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn" type="button">№ 05 · Log (5)</button>
+            <button class="pill-btn brass" type="button">+ Invite</button>
+          </div>
+        </div>
+
+        <div class="verdict-stage">
+          <div class="ballot-meta-row" style="margin-bottom:0;">
+            <span>BALLOT № 05 · OFFICIAL TALLY</span>
+            <span>6 BALLOTS COUNTED</span>
+          </div>
+
+          <div class="suspense-banner">All 6 Ballots Sealed — Counting…</div>
+
+          <div class="tally-cards">
+            <div class="tally-slip">
+              <span class="tally-num">3</span>
+              <span class="tally-lbl">JA!</span>
+              <span class="tally-dots"><i></i><i></i><i></i></span>
+            </div>
+            <div class="tally-slip">
+              <span class="tally-num">3</span>
+              <span class="tally-lbl">NEIN</span>
+              <span class="tally-dots"><i></i><i></i><i></i></span>
+            </div>
+          </div>
+
+          <div class="rubber-stamp-wrap">
+            <div class="rubber-stamp fail">Failed</div>
+            <div class="verdict-sub">Deadlocked 3–3 · Ties defeat the election</div>
+          </div>
+
+          <div class="peek-shutter" data-peek="NEIN" tabindex="0" role="button" aria-label="Hold to check your vote">
+            <span class="peek-main">⦿ Hold to check your vote</span>
+            <span class="peek-micro">Individual votes are never revealed</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" type="button">New Vote (Ballot № 06)</button>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>PARTICIPATING SEATS (6 ALIVE, 2 DEAD)</span><span>ANONYMOUS</span></div>
+          <ul class="player-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="p-tag">counted</span>
+            </li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Maren</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Dietrich</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Felix</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Greta</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row"><span class="p-ident"><span class="p-name">Lukas</span></span><span class="p-tag">counted</span></li>
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Oskar</span></span>
+              <span class="status-stamp dead">Dead</span>
+            </li>
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Hannah</span></span>
+              <span class="status-stamp dead">Dead</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="screen-footer">
+          <div class="history-bar">
+            <span>Past Ballots (5)</span>
+            <span>Logged: <strong>№ 05 · 3–3 · Failed</strong> ▾</span>
+          </div>
+          <button class="manage-trigger" type="button">Manage table (mark dead, remove)</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       07 · INVITE
+       ======================================================= -->
+  <section class="specimen" id="s07">
+    <div class="specimen-head">
+      <div><span class="specimen-id">07</span><span class="specimen-name">Invite Sheet</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">64px condensed code readable from the far end of a dining table, high-contrast QR ticket, and share/copy.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:12</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>INVITE TO TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <button class="pill-btn" type="button">✕ Close</button>
+        </div>
+
+        <div class="sheet-backdrop">
+          <div class="ballot-meta-row" style="margin-bottom:-4px;">
+            <span>READ ACROSS THE TABLE</span>
+            <span>4 LETTERS</span>
+          </div>
+
+          <div class="big-room-plaque">
+            <div class="big-room-code">KRVM</div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--brass); margin-top:6px;">
+              secret-hitler-voting.ycmjason.com/KRVM
+            </div>
+          </div>
+
+          <div style="text-align:center; font-size:12px; color:var(--ink-muted);">
+            Point a phone camera here—no app or login needed:
+          </div>
+
+          <!-- Crisp placeholder QR SVG -->
+          <div class="qr-ticket" aria-label="QR code to join room KRVM">
+            <svg viewBox="0 0 21 21" width="164" height="164" shape-rendering="crispEdges">
+              <rect width="21" height="21" fill="#EDE3D2"/>
+              <!-- Finder patterns -->
+              <path fill="#141210" d="
+                M0,0 h7 v7 h-7 z M1,1 v5 h5 v-5 z M2,2 h3 v3 h-3 z
+                M14,0 h7 v7 h-7 z M15,1 v5 h5 v-5 z M16,2 h3 v3 h-3 z
+                M0,14 h7 v7 h-7 z M1,15 v5 h5 v-5 z M2,16 h3 v3 h-3 z
+                M8,0 h1 v2 h-1 z M10,1 h2 v1 h-2 z M8,3 h2 v1 h-2 z M11,3 h2 v2 h-2 z
+                M8,6 h1 v1 h-1 z M10,6 h1 v1 h-1 z M12,6 h1 v1 h-1 z
+                M0,8 h2 v1 h-2 z M3,8 h1 v2 h-1 z M6,8 h1 v1 h-1 z
+                M8,8 h2 v2 h-2 z M11,8 h1 v1 h-1 z M13,8 h2 v1 h-2 z M16,8 h2 v2 h-2 z M19,8 h2 v1 h-2 z
+                M1,10 h2 v2 h-2 z M5,10 h2 v1 h-2 z M10,10 h3 v1 h-3 z M14,10 h1 v2 h-1 z M18,10 h1 v2 h-1 z
+                M0,12 h1 v1 h-1 z M3,12 h3 v1 h-3 z M8,12 h1 v2 h-1 z M11,12 h2 v2 h-2 z M16,12 h2 v1 h-2 z M20,12 h1 v2 h-1 z
+                M8,15 h2 v1 h-2 z M12,15 h3 v1 h-3 z M16,14 h3 v2 h-3 z
+                M9,17 h2 v2 h-2 z M13,17 h1 v3 h-1 z M15,17 h2 v1 h-2 z M18,17 h3 v2 h-3 z
+                M8,20 h3 v1 h-3 z M15,19 h2 v2 h-2 z M19,20 h2 v1 h-2 z
+              "/>
+            </svg>
+          </div>
+
+          <div class="mock-toast">✓ Link copied to clipboard</div>
+
+          <div style="margin-top:auto; display:flex; flex-direction:column; gap:8px;">
+            <button class="btn-primary" type="button">Share Invite Link</button>
+            <button class="btn-secondary" type="button" style="width:100%;">Copy URL</button>
+          </div>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       08 · MANAGE MODE
+       ======================================================= -->
+  <section class="specimen" id="s08">
+    <div class="specimen-head">
+      <div><span class="specimen-id">08</span><span class="specimen-name">Manage Mode</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">Guarded table controls: mark dead / revive, remove seat, clear votes, rename self, and early-reveal confirmation.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:15</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="manage-banner">
+          <span>⚙ Manage Table · KRVM</span>
+          <button class="pill-btn brass" type="button" style="padding:4px 10px;">Done</button>
+        </div>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>PER-PLAYER CONTROLS</span><span>DEAD / REMOVE</span></div>
+          <ul class="player-roll manage-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="row-tools">
+                <button class="mini-act" type="button">Mark dead</button>
+                <button class="mini-act danger" type="button">Remove</button>
+              </span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Maren</span></span>
+              <span class="row-tools">
+                <button class="mini-act" type="button">Mark dead</button>
+                <button class="mini-act danger" type="button">Remove</button>
+              </span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Dietrich</span></span>
+              <span class="row-tools">
+                <button class="mini-act" type="button">Mark dead</button>
+                <button class="mini-act danger" type="button">Remove</button>
+              </span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Felix</span></span>
+              <span class="row-tools">
+                <button class="mini-act" type="button">Mark dead</button>
+                <button class="mini-act danger" type="button">Remove</button>
+              </span>
+            </li>
+            <li class="player-row is-offline">
+              <span class="p-ident"><span class="p-name">Lukas</span><span class="p-tag offline">offline</span></span>
+              <span class="row-tools">
+                <button class="mini-act" type="button">Mark dead</button>
+                <button class="mini-act danger" type="button">Remove</button>
+              </span>
+            </li>
+            <li class="player-row is-dead">
+              <span class="p-ident"><span class="p-name">Hannah</span></span>
+              <span class="row-tools">
+                <button class="mini-act revive" type="button">Revive</button>
+                <button class="mini-act danger" type="button">Remove</button>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="dossier-card" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="ballot-meta-row" style="margin-bottom:0;">
+            <span>BALLOT &amp; IDENTITY CONTROLS</span>
+            <span>4 / 7 VOTED</span>
+          </div>
+
+          <!-- Inline confirmation state for "Show result early" -->
+          <div class="confirm-box">
+            <div class="confirm-text">
+              <strong>Show result early?</strong> 3 living players (Felix, Greta, Lukas) haven't voted yet. Reveal the 4 cast ballots anyway?
+            </div>
+            <div class="btn-pair">
+              <button class="btn-secondary" type="button" style="min-height:38px; padding:6px;">Cancel</button>
+              <button class="btn-secondary" type="button" style="min-height:38px; padding:6px; background:var(--stamp-fail); border-color:var(--stamp-fail); color:#fff; font-weight:600;">Confirm Reveal</button>
+            </div>
+          </div>
+
+          <div class="btn-pair">
+            <button class="btn-secondary" type="button">Clear votes (Reset)</button>
+            <button class="btn-secondary" type="button">Change my name</button>
+          </div>
+        </div>
+
+        <div class="screen-footer">
+          <button class="btn-primary" type="button" style="min-height:46px; font-size:16px;">Done Managing</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       09A · SMALL STATE — RECONNECTING & OFFLINE PLAYERS
+       ======================================================= -->
+  <section class="specimen" id="s09a">
+    <div class="specimen-head">
+      <div><span class="specimen-id">09A</span><span class="specimen-name">Small State · Reconnecting</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">Waking a sleeping phone mid-round: amber status banner reassures your seat and sealed vote are preserved.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:18</span><span class="sys-icons">LTE <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot warn"></span>RECONNECTING…</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn" type="button">№ 04 · Log (3)</button>
+          </div>
+        </div>
+
+        <div class="reconnect-strip">
+          <span style="font-family:var(--font-mono); font-size:15px; color:var(--brass);">↻</span>
+          <div>
+            <strong style="display:block; font-size:12px;">Reconnecting to Table KRVM…</strong>
+            <span style="color:var(--ink-muted); font-size:11px;">Phone woke from sleep. Your seat and sealed vote are kept.</span>
+          </div>
+        </div>
+
+        <div class="dossier-card" style="opacity:0.75;">
+          <div class="ballot-meta-row">
+            <span>BALLOT № 04 · LAST KNOWN STATE</span>
+            <span>SYNCING</span>
+          </div>
+          <div class="progress-headline">
+            <span class="progress-count">5 / 7 Voted</span>
+            <div class="progress-pips">
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip sealed"></span>
+              <span class="pip"></span>
+              <span class="pip"></span>
+            </div>
+          </div>
+          <div class="waiting-line">Waiting on <strong>Felix, Greta</strong></div>
+        </div>
+
+        <div class="sealed-box" style="opacity:0.75;">
+          <div class="sealed-stamp-line">✓ Ballot Sealed</div>
+          <div class="peek-shutter" data-peek="NEIN" tabindex="0" role="button">
+            <span class="peek-main">⦿ Hold to check your vote</span>
+            <span class="peek-micro">Available even while reconnecting</span>
+          </div>
+        </div>
+
+        <div class="roll-section" style="opacity:0.8;">
+          <div class="roll-header"><span>SEATED ROLL</span><span>OFFLINE KEEPS VOTE</span></div>
+          <ul class="player-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row is-offline">
+              <span class="p-ident"><span class="p-name">Lukas</span><span class="p-tag offline">offline</span></span>
+              <span class="status-stamp sealed">Sealed</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Felix</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Greta</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       09B · SMALL STATE — REMOVED FROM ROOM (REJOIN)
+       ======================================================= -->
+  <section class="specimen" id="s09b">
+    <div class="specimen-head">
+      <div><span class="specimen-id">09B</span><span class="specimen-name">Small State · Removed (Rejoin)</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">If someone clears your seat while you stepped away, one tap puts you right back in with your saved name.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:19</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot warn"></span>SEAT VACATED</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <button class="pill-btn" type="button">← Lobby</button>
+        </div>
+
+        <div style="margin-top:34px; display:flex; flex-direction:column; gap:16px;">
+          <div class="dossier-card" style="padding:18px 16px; display:flex; flex-direction:column; gap:14px;">
+            <div style="align-self:flex-start; font-family:var(--font-mono); font-size:10px; letter-spacing:0.12em; color:#E58577; background:var(--stamp-fail-bg); border:1px solid rgba(204,72,54,0.5); padding:3px 8px; border-radius:3px; text-transform:uppercase;">
+              Removed from Roll
+            </div>
+            <h2 style="margin:0; font-family:var(--font-display); font-size:26px; letter-spacing:0.05em; text-transform:uppercase;">
+              You were removed from Room KRVM
+            </h2>
+            <p style="margin:-6px 0 2px; font-size:13px; color:var(--ink-muted); line-height:1.45;">
+              Someone at the table cleared your chair—hopefully because your battery died, not as a coup. Rejoin below?
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div class="field-label"><span>Your Name</span><span>SAVED</span></div>
+              <div class="text-input-mock">
+                <span>Clara</span>
+                <span style="font-family:var(--font-mono); font-size:11px; color:var(--ink-muted);">edit</span>
+              </div>
+            </div>
+
+            <button class="btn-primary" type="button">Rejoin Room KRVM</button>
+          </div>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       09C · SMALL STATE — EMPTY ROOM (JUST YOU)
+       ======================================================= -->
+  <section class="specimen" id="s09c">
+    <div class="specimen-head">
+      <div><span class="specimen-id">09C</span><span class="specimen-name">Small State · Empty Room</span></div>
+      <span class="specimen-tag">390×844</span>
+    </div>
+    <div class="specimen-caption">Right after creating a room: surfaces the giant room code and share button inline until friends arrive.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:11</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <div class="top-bar">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE OPEN</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn brass" type="button">QR &amp; Invite</button>
+          </div>
+        </div>
+
+        <div class="dossier-card" style="padding:18px 16px; text-align:center; display:flex; flex-direction:column; gap:12px;">
+          <div class="ballot-meta-row" style="margin-bottom:0;">
+            <span>BALLOT № 01 · WAITING FOR QUORUM</span>
+            <span>1 SEATED</span>
+          </div>
+
+          <div style="font-family:var(--font-display); font-size:22px; letter-spacing:0.05em; text-transform:uppercase;">
+            Just you at the table so far
+          </div>
+          <div style="font-size:13px; color:var(--ink-muted); line-height:1.45; margin-top:-6px;">
+            Deal the role envelopes and read out this code—or tap Share to drop the link in the group chat.
+          </div>
+
+          <div class="big-room-plaque" style="padding:12px;">
+            <div class="big-room-code" style="font-size:52px;">KRVM</div>
+            <div style="font-family:var(--font-mono); font-size:10px; color:var(--ink-muted); margin-top:4px;">
+              secret-hitler-voting.ycmjason.com/KRVM
+            </div>
+          </div>
+
+          <div class="btn-pair">
+            <button class="btn-primary" type="button" style="min-height:46px; font-size:15px;">Share Link</button>
+            <button class="btn-secondary" type="button" style="min-height:46px;">Show QR Code</button>
+          </div>
+        </div>
+
+        <div class="roll-section">
+          <div class="roll-header"><span>SEATED ROLL (1)</span><span>READY</span></div>
+          <ul class="player-roll">
+            <li class="player-row">
+              <span class="p-ident"><span class="p-name">Clara</span><span class="p-tag you">you</span></span>
+              <span class="status-stamp waiting">Waiting</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="screen-footer">
+          <button class="manage-trigger" type="button">Change my name · Manage table</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+  <!-- =======================================================
+       10 · ROUND HISTORY (EXPANDED LEDGER)
+       ======================================================= -->
+  <section class="specimen" id="s10">
+    <div class="specimen-head">
+      <div><span class="specimen-id">10</span><span class="specimen-name">Round History Ledger</span></div>
+      <span class="specimen-tag">New Feature</span>
+    </div>
+    <div class="specimen-caption">Lives as a bottom drawer / header badge ("№ 06 · Log"): settles election-tracker arguments with zero per-player data.</div>
+    <div class="phone">
+      <div class="sys-bar"><span>23:23</span><span class="sys-icons">5G <span class="sys-batt"></span></span></div>
+      <div class="screen-body">
+        <!-- Dimmed peek of active room behind the drawer -->
+        <div class="top-bar" style="opacity:0.45;">
+          <div class="room-id-block">
+            <span class="room-kicker"><span class="dot"></span>TABLE</span>
+            <span class="room-code-sm">KRVM</span>
+          </div>
+          <div class="top-actions">
+            <button class="pill-btn brass" type="button">№ 06 · Log (5)</button>
+          </div>
+        </div>
+
+        <!-- Expanded Round History Dossier Drawer -->
+        <div class="sheet-backdrop" style="gap:12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div class="room-kicker" style="color:var(--brass);">ANONYMOUS ELECTION ARCHIVE</div>
+              <div style="font-family:var(--font-display); font-size:24px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;">
+                Past Ballots · KRVM
+              </div>
+            </div>
+            <button class="pill-btn" type="button">✕ Close</button>
+          </div>
+
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1; background:var(--bg-ink); border:1px solid var(--line-subtle); border-radius:4px; padding:8px 10px; font-family:var(--font-mono); font-size:11px;">
+              <span style="color:var(--ink-faint); display:block; font-size:9px;">TOTAL</span>
+              <strong>5 Votes</strong>
+            </div>
+            <div style="flex:1; background:var(--bg-ink); border:1px solid var(--line-subtle); border-radius:4px; padding:8px 10px; font-family:var(--font-mono); font-size:11px;">
+              <span style="color:var(--ink-faint); display:block; font-size:9px;">PASSED</span>
+              <strong style="color:var(--stamp-pass);">2</strong>
+            </div>
+            <div style="flex:1; background:var(--bg-ink); border:1px solid var(--line-subtle); border-radius:4px; padding:8px 10px; font-family:var(--font-mono); font-size:11px;">
+              <span style="color:var(--ink-faint); display:block; font-size:9px;">FAILED STREAK</span>
+              <strong style="color:var(--stamp-fail);">1 in a row</strong>
+            </div>
+          </div>
+
+          <ul class="ledger-list">
+            <li class="ledger-item">
+              <span class="ledger-round">Vote 5</span>
+              <span class="ledger-score">3 – 3 <span>(JA–NEIN · tie)</span></span>
+              <span class="ledger-outcome fail">Failed</span>
+            </li>
+            <li class="ledger-item">
+              <span class="ledger-round">Vote 4</span>
+              <span class="ledger-score">5 – 2 <span>(JA–NEIN)</span></span>
+              <span class="ledger-outcome pass">Passed</span>
+            </li>
+            <li class="ledger-item">
+              <span class="ledger-round">Vote 3</span>
+              <span class="ledger-score">2 – 5 <span>(JA–NEIN)</span></span>
+              <span class="ledger-outcome fail">Failed</span>
+            </li>
+            <li class="ledger-item">
+              <span class="ledger-round">Vote 2</span>
+              <span class="ledger-score">1 – 5 <span>(early reveal)</span></span>
+              <span class="ledger-outcome fail">Failed</span>
+            </li>
+            <li class="ledger-item">
+              <span class="ledger-round">Vote 1</span>
+              <span class="ledger-score">5 – 3 <span>(JA–NEIN)</span></span>
+              <span class="ledger-outcome pass">Passed</span>
+            </li>
+          </ul>
+
+          <div style="margin-top:auto; padding:10px 12px; background:var(--bg-ink); border:1px dashed var(--line-rule); border-radius:5px; font-size:12px; color:var(--ink-muted); line-height:1.45;">
+            <strong style="color:var(--ink-ivory);">Strict secrecy:</strong> Only room totals are stored in this log. Who voted JA! or NEIN is discarded after every round.
+          </div>
+
+          <button class="btn-secondary" type="button" style="width:100%;">Back to Ballot № 06</button>
+        </div>
+      </div>
+      <div class="home-pill"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- =========================================================
+     SMALL INLINE JS: HOLD-TO-CHECK DEMO, REVEAL CHOREOGRAPHY & LAYOUT TOGGLE
+     ========================================================= -->
+<script>
+  (function () {
+    // 1. Interactive Hold-to-Check (Frames 04A, 06A, 06B, 09A; Frame 04B stays pinned as static reference)
+    const shutters = document.querySelectorAll('.peek-shutter[data-peek]');
+
+    function setShutter(el, active) {
+      if (!el) return;
+      const main = el.querySelector('.peek-main');
+      const micro = el.querySelector('.peek-micro');
+      if (active) {
+        el.classList.add('is-peeking');
+        if (!el.dataset.origMain) {
+          el.dataset.origMain = main.textContent;
+          el.dataset.origMicro = micro.textContent;
+        }
+        main.textContent = 'You voted: ' + el.dataset.peek;
+        micro.textContent = 'Release thumb to conceal';
+      } else if (el.classList.contains('is-peeking')) {
+        el.classList.remove('is-peeking');
+        if (el.dataset.origMain) main.textContent = el.dataset.origMain;
+        if (el.dataset.origMicro) micro.textContent = el.dataset.origMicro;
+      }
+    }
+
+    shutters.forEach((el) => {
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        el.setPointerCapture?.(e.pointerId);
+        setShutter(el, true);
+      });
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => {
+        el.addEventListener(ev, () => setShutter(el, false));
+      });
+      el.addEventListener('contextmenu', (e) => e.preventDefault());
+      el.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          setShutter(el, true);
+        }
+      });
+      el.addEventListener('keyup', () => setShutter(el, false));
+      el.addEventListener('blur', () => setShutter(el, false));
+    });
+
+    // 2. Demo feedback on Frame 03 ballot buttons
+    const hint = document.getElementById('demoVoteHint');
+    document.querySelectorAll('[data-demo-vote]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!hint) return;
+        hint.textContent = 'Ballot cast secretly → screen immediately locks to Frame 04A (no colour shown).';
+        hint.style.color = '#CFA14A';
+        clearTimeout(hint._t);
+        hint._t = setTimeout(() => {
+          hint.textContent = 'Anonymous — only the totals appear once all 7 living players vote.';
+          hint.style.color = '';
+        }, 2400);
+      });
+    });
+
+    // 3. Three-Beat Reveal Animation Replay (Frames 06A & 06B)
+    function playReveal(phoneEl) {
+      if (!phoneEl) return;
+      clearTimeout(phoneEl._t1);
+      clearTimeout(phoneEl._t2);
+      clearTimeout(phoneEl._t3);
+      phoneEl.classList.remove('anim-beat-1', 'anim-beat-2', 'anim-beat-3');
+      void phoneEl.offsetWidth; // reflow
+
+      // Beat 1 (0–260ms): Suspense lock
+      phoneEl.classList.add('anim-beat-1');
+
+      // Beat 2 (260–620ms): Tally slips unfold first
+      phoneEl._t1 = setTimeout(() => {
+        phoneEl.classList.remove('anim-beat-1');
+        phoneEl.classList.add('anim-beat-2');
+      }, 280);
+
+      // Beat 3 (620–900ms): Wet-ink verdict stamp slams down
+      phoneEl._t2 = setTimeout(() => {
+        phoneEl.classList.remove('anim-beat-2');
+        phoneEl.classList.add('anim-beat-3');
+      }, 640);
+
+      phoneEl._t3 = setTimeout(() => {
+        phoneEl.classList.remove('anim-beat-3');
+      }, 1050);
+    }
+
+    document.querySelectorAll('[data-replay-target]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        playReveal(document.getElementById(btn.dataset.replayTarget));
+      });
+    });
+
+    const replayAllBtn = document.getElementById('replayAllBtn');
+    if (replayAllBtn) {
+      replayAllBtn.addEventListener('click', () => {
+        const p6a = document.getElementById('phone06a');
+        const p6b = document.getElementById('phone06b');
+        if (p6a) p6a.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          playReveal(p6a);
+          playReveal(p6b);
+        }, 260);
+      });
+    }
+
+    // 4. Layout switcher (Wrapped Side-by-Side Rows vs Single Continuous Rail)
+    const layoutBtn = document.getElementById('layoutToggleBtn');
+    if (layoutBtn) {
+      layoutBtn.addEventListener('click', () => {
+        document.body.classList.toggle('rail-mode');
+      });
+    }
+  })();
+</script>
+</body>
+</html>
