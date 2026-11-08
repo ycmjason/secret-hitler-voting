@@ -1,0 +1,6 @@
+pre-commit:
+  jobs:
+    - run: pnpm run --silent check:fix
+      stage_fixed: true
+    - run: pnpm run --silent typecheck
+    - run: pnpm run --silent test run

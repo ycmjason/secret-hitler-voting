@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b1916">
+<title>Vote</title>
+<style>
+  :root {
+    --bg: #1b1916; --panel: #26231f; --line: #3a362f; --text: #f1eadb; --muted: #9b927f;
+    --ja: #3f9a63; --ja-soft: #1f3a29; --nein: #c8442f; --nein-soft: #42211a; --accent: #e8b84a;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { min-height: 100dvh; padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); }
+  main { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .room { font-weight: 800; letter-spacing: .12em; font-size: 22px; }
+  .room small { display: block; font-size: 11px; letter-spacing: .08em; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+  .chip-btn { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 600; }
+  .conn { width: 8px; height: 8px; border-radius: 50%; background: var(--nein); display: inline-block; margin-right: 6px; vertical-align: middle; }
+  .conn.on { background: var(--ja); }
+  .status { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; text-align: center; }
+  .status .big { font-size: 20px; font-weight: 800; }
+  .status .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .votes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .vote { border-radius: 16px; padding: 34px 0; font-size: 30px; font-weight: 900; letter-spacing: .06em; border: 3px solid transparent; transition: transform .08s, opacity .15s; }
+  .vote:active { transform: scale(.97); }
+  .vote { background: #34302a; color: var(--text); }
+  .cast { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 16px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+  .cast .ok { font-size: 22px; font-weight: 800; }
+  .peek { background: #34302a; border-radius: 12px; padding: 16px; font-weight: 700; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
+  .peek.on { background: var(--text); color: var(--bg); }
+  .hint { text-align: center; color: var(--muted); font-size: 14px; margin-top: -6px; }
+  .tally { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tally div { border-radius: 16px; padding: 14px 0; text-align: center; font-weight: 900; }
+  .tally .n { font-size: 44px; line-height: 1; }
+  .tally .l { font-size: 13px; letter-spacing: .12em; opacity: .85; }
+  .tally .ja { background: var(--ja); } .tally .nein { background: var(--nein); }
+  .verdict { text-align: center; font-size: 26px; font-weight: 900; letter-spacing: .08em; }
+  .verdict.pass { color: #8fe0ab; } .verdict.fail { color: #f19a88; }
+  ul { list-style: none; margin: 0; padding: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  li { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--line); min-height: 52px; }
+  li:first-child { border-top: 0; }
+  li .name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  li .name em { font-style: normal; color: var(--muted); font-weight: 500; font-size: 13px; margin-left: 6px; }
+  li.off .name { opacity: .5; }
+  li.dead .name { text-decoration: line-through; opacity: .45; }
+  .badge { font-size: 13px; font-weight: 800; border-radius: 999px; padding: 4px 10px; letter-spacing: .04em; }
+  .badge.wait { color: var(--muted); border: 1px dashed var(--line); font-weight: 600; }
+  .badge.done { background: var(--accent); color: #241c06; }
+  .badge.ja { background: var(--ja); color: #fff; } .badge.nein { background: var(--nein); color: #fff; }
+  .badge.none { color: var(--muted); }
+  .mini { background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 13px; color: var(--muted); }
+  .primary { background: var(--accent); color: #241c06; font-weight: 800; border-radius: 14px; padding: 16px; font-size: 18px; width: 100%; }
+  .secondary { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; font-weight: 700; width: 100%; }
+  .row { display: flex; gap: 10px; }
+  .footer { display: flex; flex-direction: column; gap: 10px; }
+  .link { background: none; color: var(--muted); text-decoration: underline; font-size: 14px; align-self: center; padding: 6px; }
+  form.join { display: flex; flex-direction: column; gap: 12px; margin-top: 18vh; }
+  form.join h1 { margin: 0; font-size: 28px; }
+  form.join p { margin: 0; color: var(--muted); }
+  input { font: inherit; font-size: 20px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--text); outline: none; }
+  input:focus { border-color: var(--accent); }
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .reveal-anim { animation: pop .35s ease-out; }
+  @keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: none; opacity: 1; } }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div class="toast" id="toast"></div>
+<script>
+const room = location.pathname.slice(1);
+document.title = `Vote · ${room}`;
+const myId = localStorage.sh_id || (localStorage.sh_id = crypto.randomUUID());
+let name = localStorage.sh_name || '';
+let swapRound = null, changing = false, peeking = false;
+let state = null, ws = null, connected = false, manage = false, kicked = false, lastRevealed = null, retry = 0;
+const app = document.getElementById('app');
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1600);
+}
+function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+function connect() {
+  if (!name || kicked) return;
+  if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/${room}`);
+  ws.onopen = () => { connected = true; retry = 0; send({ t: 'join', id: myId, name }); render(); };
+  ws.onmessage = (e) => {
+    if (e.data === 'pong') return;
+    const m = JSON.parse(e.data);
+    if (m.t === 'kicked') { kicked = true; ws.close(); render(); return; }
+    if (m.t === 'state') {
+      if (lastRevealed === false && m.revealed && navigator.vibrate) navigator.vibrate([60, 40, 60]);
+      if (m.round !== swapRound) { swapRound = m.round; changing = false; }
+      lastRevealed = m.revealed; state = m; render();
+    }
+  };
+  ws.onclose = () => {
+    connected = false; render();
+    if (!kicked) setTimeout(connect, Math.min(500 * 2 ** retry++, 5000));
+  };
+}
+setInterval(() => { if (ws && ws.readyState === 1) ws.send('ping'); }, 20000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') connect(); });
+
+function share() {
+  const url = location.href;
+  if (navigator.share) navigator.share({ title: 'Vote', url }).catch(() => {});
+  else navigator.clipboard.writeText(url).then(() => toast('Link copied'));
+}
+
+function renderJoin() {
+  app.innerHTML = `
+    <form class="join">
+      <h1>Room ${esc(room)}</h1>
+      <p>${kicked ? 'You were removed from this room. Rejoin?' : 'What should everyone call you?'}</p>
+      <input id="nm" maxlength="24" autocomplete="off" placeholder="Your name" value="${esc(name)}" required>
+      <button class="primary">${kicked ? 'Rejoin' : 'Join'}</button>
+    </form>`;
+  const input = app.querySelector('#nm');
+  if (!kicked) input.focus();
+  app.querySelector('form').onsubmit = (e) => {
+    e.preventDefault();
+    const v = input.value.trim();
+    if (!v) return;
+    name = localStorage.sh_name = v;
+    kicked = false; state = null;
+    if (ws && ws.readyState === 1) send({ t: 'join', id: myId, name }); else connect();
+    render();
+  };
+}
+
+function render() {
+  if (!name || kicked) return renderJoin();
+  const header = `
+    <header>
+      <div class="room"><small><span class="conn ${connected ? 'on' : ''}"></span>${connected ? 'Room' : 'Reconnecting…'}</small>${esc(room)}</div>
+      <button class="chip-btn" data-a="share">Invite</button>
+    </header>`;
+  if (!state) { app.innerHTML = header + `<div class="status"><div class="sub">Connecting…</div></div>`; bind(); return; }
+
+  const me = state.players.find((p) => p.id === myId);
+  const alive = state.players.filter((p) => !p.dead);
+  const waiting = alive.filter((p) => !p.voted);
+  const ja = state.tally ? state.tally.ja : 0;
+  const nein = state.tally ? state.tally.nein : 0;
+  let main = '';
+
+  if (state.revealed) {
+    const pass = ja > nein;
+    main = `
+      <div class="reveal-anim" style="display:flex;flex-direction:column;gap:12px">
+        <div class="tally">
+          <div class="ja"><div class="n">${ja}</div><div class="l">JA!</div></div>
+          <div class="nein"><div class="n">${nein}</div><div class="l">NEIN</div></div>
+        </div>
+        <div class="verdict ${pass ? 'pass' : 'fail'}">${pass ? 'PASSED' : 'FAILED'}</div>
+        ${me && me.vote ? peekBtn(me) : ''}
+      </div>`;
+  } else {
+    main = `
+      <div class="status">
+        <div class="big">${waiting.length === 0 ? 'Revealing…' : `${alive.length - waiting.length} / ${alive.length} voted`}</div>
+        <div class="sub">${waiting.length ? 'Waiting for ' + waiting.map((p) => esc(p.name)).join(', ') : ''}</div>
+      </div>`;
+    if (me && me.dead) {
+      main += `<div class="status"><div class="sub">You're marked dead, so you don't vote.</div></div>`;
+    } else if (me) {
+      if (me.vote && !changing) {
+        main += `
+          <div class="cast">
+            <div class="ok">✓ Vote cast</div>
+            ${peekBtn(me)}
+            <div class="row">
+              <button class="secondary" data-a="change">Change vote</button>
+              <button class="secondary" data-a="withdraw">Withdraw</button>
+            </div>
+          </div>`;
+      } else {
+        const btns = [`<button class="vote" data-a="vote" data-v="ja">JA!</button>`, `<button class="vote" data-a="vote" data-v="nein">NEIN</button>`];
+        main += `
+          <div class="votes">${btns.join('')}</div>
+          <div class="hint">${changing ? '<button class="link" data-a="cancel">Keep my current vote</button>' : 'Anonymous: only the totals are shown, once everyone has voted.'}</div>`;
+      }
+    }
+  }
+
+  const list = state.players.map((p) => {
+    let badge;
+    if (p.dead) badge = `<span class="badge none">dead</span>`;
+    else badge = p.voted ? `<span class="badge done">voted</span>` : `<span class="badge wait">waiting</span>`;
+    const tools = manage ? `
+      <button class="mini" data-a="dead" data-id="${esc(p.id)}">${p.dead ? 'revive' : 'dead'}</button>
+      <button class="mini" data-a="kick" data-id="${esc(p.id)}">remove</button>` : '';
+    return `<li class="${p.online ? '' : 'off'} ${p.dead ? 'dead' : ''}">
+      <span class="name">${esc(p.name)}${p.id === myId ? '<em>you</em>' : ''}${p.online ? '' : '<em>offline</em>'}</span>
+      ${manage ? tools : badge}</li>`;
+  }).join('');
+
+  const footer = `
+    <div class="footer">
+      ${state.revealed ? `<button class="primary" data-a="reset">New vote</button>` : ''}
+      ${manage ? `<div class="row">
+        ${!state.revealed ? `<button class="secondary" data-a="reveal">Reveal now</button><button class="secondary" data-a="reset">Clear votes</button>` : ''}
+        <button class="secondary" data-a="rename">Change my name</button>
+      </div>` : ''}
+      <button class="link" data-a="manage">${manage ? 'Done managing' : 'Manage players (mark dead, remove)'}</button>
+    </div>`;
+
+  app.innerHTML = header + main + `<ul>${list}</ul>` + footer;
+  bind();
+}
+
+function peekBtn(me) {
+  const label = me.vote === 'ja' ? 'JA!' : 'NEIN';
+  return `<div class="peek ${peeking ? 'on' : ''}" data-peek="${label}">${peeking ? 'You voted ' + label : 'Hold to check your vote'}</div>`;
+}
+function setPeek(on) {
+  peeking = on;
+  const el = app.querySelector('[data-peek]');
+  if (!el) return;
+  el.classList.toggle('on', on);
+  el.textContent = on ? 'You voted ' + el.dataset.peek : 'Hold to check your vote';
+}
+app.addEventListener('pointerdown', (e) => { if (e.target.closest('[data-peek]')) { e.preventDefault(); setPeek(true); } });
+app.addEventListener('contextmenu', (e) => { if (e.target.closest('[data-peek]')) e.preventDefault(); });
+['pointerup', 'pointercancel', 'blur'].forEach((ev) => window.addEventListener(ev, () => peeking && setPeek(false)));
+
+function bind() {
+  app.querySelectorAll('[data-a]').forEach((b) => b.onclick = () => {
+    const { a, v, id } = b.dataset;
+    const me = state && state.players.find((p) => p.id === myId);
+    if (a === 'share') share();
+    else if (a === 'vote') { changing = false; send({ t: 'vote', v }); if (navigator.vibrate) navigator.vibrate(30); }
+    else if (a === 'change') { changing = true; render(); }
+    else if (a === 'cancel') { changing = false; render(); }
+    else if (a === 'withdraw') send({ t: 'vote', v: null });
+    else if (a === 'reset') send({ t: 'reset' });
+    else if (a === 'reveal') { if (confirm('Reveal now, before everyone has voted?')) send({ t: 'reveal' }); }
+    else if (a === 'dead') send({ t: 'dead', id });
+    else if (a === 'kick') { const p = state.players.find((x) => x.id === id); if (p && confirm(`Remove ${p.name}?`)) send({ t: 'kick', id }); }
+    else if (a === 'manage') { manage = !manage; render(); }
+    else if (a === 'rename') { const n = prompt('Your name', name); if (n && n.trim()) { name = localStorage.sh_name = n.trim().slice(0, 24); send({ t: 'join', id: myId, name }); } }
+  });
+}
+
+render();
+connect();
+</script>
+</body>
+</html>
