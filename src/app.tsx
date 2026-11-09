@@ -23,8 +23,10 @@ export const App = () => {
   useEffect(() => {
     document.title = code ? `Room ${code} · ${TITLE}` : TITLE;
   }, [code]);
+  // overflow-x-clip: the reveal's stamp waits off-screen at 2.8× before it slams down. Left
+  // unclipped, that overflow widens a phone's layout viewport, and with it every fixed overlay.
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col gap-4 px-5 pt-[max(env(safe-area-inset-top),12px)] pb-[max(env(safe-area-inset-bottom),16px)]">
+    <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col gap-4 overflow-x-clip px-5 pt-[max(env(safe-area-inset-top),12px)] pb-[max(env(safe-area-inset-bottom),16px)]">
       {code ? <RoomPage key={code} code={code} /> : <Landing />}
     </main>
   );
