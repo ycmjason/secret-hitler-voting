@@ -44,11 +44,17 @@
       "quoteStyle": "single"
     }
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "files": {
     "includes": [
       "**/*",
       "!**/.cache/*",
       "!**/dist/*",
+      "!**/.wrangler",
       "!**/node_modules/*",
       "!**/*.generated.*",
       "!**/*.gen.*",

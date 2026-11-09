@@ -31,7 +31,8 @@ export const createRoomState = (code: string): RoomState => ({
 const tally = (players: Player[]): Result => {
   const ja = players.filter(p => p.vote === 'ja').length;
   const nein = players.filter(p => p.vote === 'nein').length;
-  return { ja, nein, passed: ja > nein };
+  const missing = players.filter(p => !p.dead && p.vote === null).length;
+  return { ja, nein, passed: ja > nein, missing };
 };
 
 const reveal = (state: RoomState): RoomState => {
@@ -70,6 +71,8 @@ export const applyMessage = (
 ): RoomState => {
   const isMember = (id: string | null) => state.players.some(p => p.id === id);
   switch (message.type) {
+    case 'watch':
+      return state;
     case 'join': {
       const name = normalizePlayerName(message.name);
       return isMember(message.playerId)

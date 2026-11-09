@@ -1,1 +1,725 @@
 @import "tailwindcss";
+@import "@fontsource-variable/big-shoulders-display/wght";
+@import "@fontsource-variable/libre-franklin/wght";
+@import "@fontsource/courier-prime/latin-400";
+@import "@fontsource/courier-prime/latin-700";
+
+/* "The Ballot Office": see design/sketches/opus/NOTES.md for the palette and the reasoning. */
+@theme {
+  --color-ink: #14120f;
+  --color-desk: #1e1b17;
+  --color-desk-2: #29251f;
+  --color-rule: #3b352c;
+  --color-text: #ece3cf;
+  --color-muted: #a89c86;
+  --color-paper: #e8dcc2;
+  --color-paper-edge: #cbbd9c;
+  --color-paper-ink: #1c1813;
+  --color-paper-muted: #63584a;
+  --color-brass: #c9a24a;
+  --color-brass-ink: #1f1806;
+  --color-oxblood: #a3342a;
+  --color-oxblood-lit: #e3786a;
+  --color-verdigris: #2c6a4f;
+  --color-verdigris-lit: #8cc4a6;
+  --color-kraft: #7b5e40;
+  --color-kraft-dark: #644b31;
+  --color-amber: #d9a441;
+  --color-live: #86b593;
+
+  --font-display: "Big Shoulders Display Variable", "Libre Franklin Variable", sans-serif;
+  --font-body: "Libre Franklin Variable", system-ui, sans-serif;
+  --font-typed: "Courier Prime", "Courier New", monospace;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection {
+    background: var(--color-brass);
+    color: var(--color-brass-ink);
+  }
+  html {
+    background: #0b0a08;
+    color: var(--color-text);
+    color-scheme: dark;
+  }
+  body {
+    font: 16px / 1.45 var(--font-body);
+    min-height: 100dvh;
+    background: radial-gradient(120% 70% at 50% 0%, #1c1915 0%, var(--color-ink) 60%) fixed;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  .icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: none;
+  }
+  .icon-sm {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Buttons */
+  .btn {
+    min-height: 56px;
+    border-radius: 14px;
+    font: 700 18px var(--font-body);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 0 18px;
+    transition: transform 0.1s;
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .btn-primary {
+    background: var(--color-brass);
+    color: var(--color-brass-ink);
+    box-shadow: 0 8px 18px -10px rgb(201 162 74 / 0.6);
+  }
+  .btn-primary:disabled {
+    background: var(--color-desk);
+    color: #6f6657;
+    box-shadow: none;
+  }
+  .btn-ghost {
+    background: var(--color-desk);
+    color: var(--color-text);
+  }
+  .btn-danger {
+    background: var(--color-oxblood);
+    color: #fbefe9;
+  }
+  .icon-btn {
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--color-text);
+    background: var(--color-desk);
+    padding: 0 12px;
+    font: 600 15px var(--font-body);
+  }
+  .text-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-muted);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  /* Connection dot */
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    background: var(--color-live);
+    box-shadow: 0 0 0 3px rgb(134 181 147 / 0.16);
+    align-self: center;
+  }
+  .dot-wait {
+    background: var(--color-amber);
+    box-shadow: 0 0 0 3px rgb(217 164 65 / 0.18);
+    animation: blink 1.2s infinite;
+  }
+
+  /* Ballot cards: identical by rule. Only the word and its gloss differ. */
+  .ballot {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    border-radius: 10px;
+    background: var(--color-paper);
+    color: var(--color-paper-ink);
+    display: block;
+    box-shadow:
+      0 1px 0 #f4ecd9 inset,
+      0 12px 20px -10px rgb(0 0 0 / 0.75);
+    transition:
+      transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+      box-shadow 0.12s;
+    container-type: inline-size;
+  }
+  button.ballot:active {
+    transform: translateY(3px) scale(0.985);
+    box-shadow:
+      0 1px 0 #f4ecd9 inset,
+      0 4px 8px -4px rgb(0 0 0 / 0.7);
+  }
+  .ballot-frame {
+    position: absolute;
+    inset: 5.5cqi;
+    border: 4.1cqi solid var(--color-paper-ink);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ballot-frame::before {
+    content: "";
+    position: absolute;
+    inset: 2.7cqi;
+    border: 1.5px solid var(--color-paper-ink);
+    border-radius: 1px;
+  }
+  .ballot-lock {
+    transform: rotate(-90deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .ballot-word {
+    font: 900 57cqi / 0.8 var(--font-display);
+    letter-spacing: 0.02em;
+    padding-top: 0.08em;
+  }
+  .ballot-gloss {
+    font: 700 7.5cqi var(--font-typed);
+    letter-spacing: 0.32em;
+    margin-right: -0.32em;
+    color: var(--color-paper-muted);
+  }
+
+  /* Sealed envelope */
+  .env {
+    position: relative;
+    height: 150px;
+    margin: 0 6px;
+  }
+  .env > * {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+  .env-back {
+    inset: 0;
+    background: var(--color-kraft-dark);
+    border-radius: 6px;
+  }
+  .env-slip {
+    left: 50%;
+    width: 168px;
+    margin-left: -84px;
+    top: 18px;
+    height: 120px;
+    background: var(--color-paper);
+    color: var(--color-paper-ink);
+    border-radius: 8px;
+    opacity: 0;
+    transition:
+      transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.1s;
+  }
+  .env-slip-frame {
+    position: absolute;
+    inset: 6px;
+    border: 5px solid var(--color-paper-ink);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+  .env-slip-frame::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1.25px solid var(--color-paper-ink);
+  }
+  .env-slip-word {
+    font: 900 54px / 0.8 var(--font-display);
+    letter-spacing: 0.02em;
+    padding-top: 4px;
+  }
+  .env-slip-gloss {
+    font: 700 10px var(--font-typed);
+    letter-spacing: 0.32em;
+    margin-right: -0.32em;
+    color: var(--color-paper-muted);
+  }
+  .env-front {
+    inset: 0;
+    background: var(--color-kraft);
+    border-radius: 6px;
+    clip-path: polygon(0 18%, 50% 58%, 100% 18%, 100% 100%, 0 100%);
+    box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.2);
+  }
+  .env-front span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    text-align: center;
+    font: 700 13px var(--font-typed);
+    color: #2a1f13;
+    letter-spacing: 0.14em;
+  }
+  .env-flap {
+    top: 0;
+    height: 62%;
+    background: #6f5437;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    z-index: 3;
+    border-radius: 6px 6px 0 0;
+  }
+  .env .env-seal {
+    position: absolute;
+    left: 50%;
+    right: auto;
+    top: 52%;
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border-radius: 50%;
+    background: var(--color-oxblood);
+    z-index: 4;
+    box-shadow:
+      0 2px 3px rgb(0 0 0 / 0.4),
+      inset 0 0 0 4px rgb(0 0 0 / 0.12);
+    transition: opacity 0.15s;
+  }
+  .held .env-seal {
+    opacity: 0;
+  }
+  .held .env-slip {
+    opacity: 1;
+    transform: translateY(-30px) rotate(-1.5deg);
+    z-index: 5;
+    box-shadow: 0 14px 24px -10px rgb(0 0 0 / 0.7);
+  }
+
+  /* Hold to check */
+  .hold {
+    width: 100%;
+    min-height: 60px;
+    border-radius: 14px;
+    background: var(--color-desk);
+    border: 1px dashed #5a5246;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font: 600 16px var(--font-body);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: none;
+    transition:
+      background 0.12s,
+      color 0.12s;
+  }
+  .held .hold {
+    background: var(--color-paper);
+    color: var(--color-paper-ink);
+    border-color: transparent;
+  }
+
+  /* Roster */
+  .roster-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 39px;
+    border-top: 1px solid var(--color-rule);
+  }
+  .roster-row:last-child {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .wait-dash {
+    width: 14px;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      var(--color-muted) 30%,
+      transparent 30% 50%,
+      var(--color-muted) 50% 80%,
+      transparent 80%
+    );
+  }
+  .mini-btn {
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: var(--color-desk-2);
+    font: 600 14px var(--font-body);
+  }
+
+  /* Death notice: a mourning border */
+  .notice {
+    background: var(--color-paper);
+    color: var(--color-paper-ink);
+    border-radius: 4px;
+    padding: 20px 20px 18px;
+    border: 7px solid #0b0a08;
+    outline: 1px solid var(--color-paper-edge);
+    outline-offset: -11px;
+  }
+
+  /* Tally sheet and stamp */
+  .tally-sheet {
+    position: relative;
+    background: var(--color-paper);
+    color: var(--color-paper-ink);
+    border-radius: 4px;
+    padding: 16px 0 34px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    box-shadow: 0 18px 30px -14px rgb(0 0 0 / 0.8);
+  }
+  .tally-col {
+    text-align: center;
+    padding: 0 12px;
+  }
+  .tally-col + .tally-col {
+    border-left: 1.5px solid var(--color-paper-ink);
+  }
+  .tally-marks {
+    height: 34px;
+    stroke: var(--color-paper-ink);
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    fill: none;
+    margin: 0 auto;
+  }
+  .stamp {
+    position: absolute;
+    left: 50%;
+    bottom: -26px;
+    transform: translateX(-50%) rotate(-7deg);
+    font: 900 54px / 1 var(--font-display);
+    letter-spacing: 0.1em;
+    padding: 6px 14px 4px 20px;
+    border: 4px solid currentColor;
+    border-radius: 8px;
+    outline: 1.5px solid currentColor;
+    outline-offset: 3px;
+    background: rgb(232 220 194 / 0.86);
+    white-space: nowrap;
+  }
+  .mini-stamp {
+    font: 900 15px var(--font-display);
+    letter-spacing: 0.12em;
+    padding: 3px 8px 2px;
+    border: 2px solid currentColor;
+    border-radius: 4px;
+    transform: rotate(-3deg);
+  }
+
+  /* The reveal. Timings come from CSS variables set by the result screen (see reveal.ts). */
+  .curtain {
+    position: fixed;
+    inset: 0;
+    background: var(--color-ink);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 700 18px var(--font-typed);
+    letter-spacing: 0.12em;
+    color: var(--color-text);
+    pointer-events: none;
+    animation: curtain 0.4s ease-out both;
+  }
+  .playing .res-head {
+    animation: rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both 0.1s;
+  }
+  .playing .tally-sheet {
+    animation:
+      sheet-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both 0.12s,
+      thud 0.18s ease-out both var(--thud);
+  }
+  .playing .tally-label {
+    animation: fade 0.2s both 0.3s;
+  }
+  .playing .stamp {
+    animation: slam 0.22s cubic-bezier(0.3, 0, 0.1, 1) both var(--slam);
+  }
+  .playing .after-reveal {
+    animation: rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both var(--after);
+  }
+  .playing .tally-marks line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 0.1s ease-out forwards;
+  }
+
+  /* Room-code boxes */
+  .code-box {
+    width: 100%;
+    height: 72px;
+    border-radius: 10px;
+    text-align: center;
+    font: 900 44px / 1 var(--font-display);
+    text-transform: uppercase;
+    padding: 4px 0 0;
+    background: transparent;
+    color: var(--color-text);
+    border: 1.5px dashed #5a5246;
+    caret-color: transparent;
+    outline: none;
+    transition:
+      background 0.12s,
+      border-color 0.12s,
+      transform 0.12s;
+  }
+  .code-box:not(:placeholder-shown) {
+    background: var(--color-paper);
+    color: var(--color-paper-ink);
+    border: 1.5px solid var(--color-paper-edge);
+    box-shadow: 0 8px 14px -10px rgb(0 0 0 / 0.8);
+  }
+  .code-box:focus {
+    border: 2px solid var(--color-brass);
+    background: var(--color-desk);
+  }
+  .code-box:focus:not(:placeholder-shown) {
+    background: var(--color-paper);
+  }
+  .code-bad .code-box:focus {
+    border-color: var(--color-oxblood-lit);
+  }
+  /* Two identical shakes, alternated, so a second reject in a row shakes again. */
+  .code-bad-0 .code-box:focus {
+    animation: shake 0.3s;
+  }
+  .code-bad-1 .code-box:focus {
+    animation: shake-again 0.3s;
+  }
+
+  /* Double rules under and over mastheads */
+  .rules {
+    height: 7px;
+    border-top: 3px solid var(--color-text);
+    border-bottom: 1px solid var(--color-text);
+  }
+  .rules-flip {
+    border-top-width: 1px;
+    border-bottom-width: 3px;
+  }
+  .or-rule {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-muted);
+    font: 400 13px var(--font-typed);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+  .or-rule::before,
+  .or-rule::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-rule);
+  }
+
+  .struck-title {
+    position: relative;
+    display: inline-block;
+  }
+  .struck-title::after {
+    content: "";
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    top: 54%;
+    height: 6px;
+    background: var(--color-oxblood-lit);
+    transform: rotate(-2deg);
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2.5px solid rgb(241 220 169 / 0.25);
+    border-top-color: var(--color-amber);
+    animation: spin 0.9s linear infinite;
+    flex: none;
+  }
+
+  /* Bottom sheets and the invite screen are <dialog>s */
+  .sheet {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 92dvh;
+    background: transparent;
+    color: var(--color-text);
+    padding: 0;
+    border: 0;
+  }
+  .sheet-panel {
+    max-width: 430px;
+    margin: 0 auto;
+    background: #221f1a;
+    border-radius: 22px 22px 0 0;
+    padding: 10px 20px calc(32px + env(safe-area-inset-bottom));
+    box-shadow: 0 -20px 40px -10px rgb(0 0 0 / 0.7);
+  }
+  .sheet[open] .sheet-panel {
+    animation: sheet-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .sheet::backdrop,
+  .fullscreen::backdrop {
+    background: rgb(8 7 5 / 0.72);
+  }
+  .fullscreen {
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    background: radial-gradient(120% 70% at 50% 0%, #1c1915 0%, var(--color-ink) 60%);
+    color: var(--color-text);
+    padding: 0;
+    border: 0;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes shake {
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+@keyframes shake-again {
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+@keyframes curtain {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(120px) rotate(3deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slam {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-16deg) scale(2.8);
+    filter: blur(8px);
+  }
+  70% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) rotate(-7deg) scale(1);
+    filter: blur(0);
+  }
+}
+@keyframes thud {
+  0% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(4px) scale(0.992);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The reveal checks prefers-reduced-motion itself and skips straight to the end. */
+@media (prefers-reduced-motion: reduce) {
+  .dot-wait,
+  .spinner,
+  .sheet[open] .sheet-panel,
+  .code-bad-0 .code-box:focus,
+  .code-bad-1 .code-box:focus {
+    animation: none;
+  }
+  .ballot,
+  button.ballot:active,
+  .btn,
+  .hold,
+  .env-slip,
+  .env .env-seal,
+  .code-box {
+    transition: none;
+  }
+}

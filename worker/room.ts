@@ -21,8 +21,12 @@ export class Room extends DurableObject<Env> {
   }
 
   override async fetch(request: Request): Promise<Response> {
-    const code = new URL(request.url).searchParams.get('code') ?? '';
-    this.state ??= createRoomState(code);
+    if (!this.state) {
+      // Persist straight away: a watcher may sit on the join screen long enough for the object to
+      // hibernate, and it must wake up with a room to join.
+      this.state = createRoomState(new URL(request.url).searchParams.get('code') ?? '');
+      await this.ctx.storage.put(STATE_KEY, this.state);
+    }
     const [client, server] = Object.values(new WebSocketPair()) as [WebSocket, WebSocket];
     this.ctx.acceptWebSocket(server);
     server.serializeAttachment({ playerId: null } satisfies SocketAttachment);
@@ -36,18 +40,22 @@ export class Room extends DurableObject<Env> {
     if (!parsed.success) return;
     const message = parsed.data;
 
+    // Who sent it, before anything below changes the socket's attachment.
+    const senderId = getPlayerId(ws);
+    const next = applyMessage(this.state, senderId, message);
+    const changed = next !== this.state;
+    if (changed) {
+      this.state = next;
+      await this.ctx.storage.put(STATE_KEY, next);
+    }
+
     if (message.type === 'join') ws.serializeAttachment({ playerId: message.playerId });
-    if (message.type === 'remove') {
+    // Only a remove the rules accepted detaches anyone: not one from a socket that hasn't joined.
+    if (message.type === 'remove' && changed) {
       for (const socket of this.socketsOf(message.playerId)) {
         socket.serializeAttachment({ playerId: null } satisfies SocketAttachment);
         send(socket, { type: 'removed' });
       }
-    }
-
-    const next = applyMessage(this.state, getPlayerId(ws), message);
-    if (next !== this.state) {
-      this.state = next;
-      await this.ctx.storage.put(STATE_KEY, next);
     }
     this.broadcast();
   }
@@ -84,8 +92,8 @@ export class Room extends DurableObject<Env> {
     const sockets = this.openSockets();
     const onlineIds = new Set(sockets.map(getPlayerId).filter(id => id !== null));
     for (const ws of sockets) {
+      // Watchers (no player yet) get a view too: it holds no votes, only who's seated.
       const viewerId = getPlayerId(ws);
-      if (viewerId === null) continue;
       send(ws, { type: 'state', room: toRoomView(state, { viewerId, onlineIds }) });
     }
   }
