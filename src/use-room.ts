@@ -9,16 +9,16 @@ const MAX_RETRY_DELAY_MS = 5_000;
 /**
  * Keeps a live connection to a room. Reconnects with backoff (and immediately when the tab
  * becomes visible again), re-joining as the same player so their seat and vote are kept.
- * Pass `player: null` to stay disconnected, e.g. until the player has entered a name.
+ * With `name: null` it only watches: it receives the room's state without taking a seat.
  */
-export const useRoom = (code: string, player: { id: string; name: string } | null) => {
+export const useRoom = (code: string, player: { id: string; name: string | null }) => {
   const [room, setRoom] = useState<RoomView | null>(null);
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
   const [removed, setRemoved] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
-  const nameRef = useRef(player?.name ?? '');
-  nameRef.current = player?.name ?? '';
-  const playerId = player?.id ?? null;
+  const nameRef = useRef(player.name);
+  nameRef.current = player.name;
+  const { id: playerId, name } = player;
 
   const send = useCallback((message: ClientMessage) => {
     const socket = socketRef.current;
@@ -26,7 +26,7 @@ export const useRoom = (code: string, player: { id: string; name: string } | nul
   }, []);
 
   useEffect(() => {
-    if (playerId === null || removed) return;
+    if (removed) return;
     let disposed = false;
     let retries = 0;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
@@ -39,12 +39,13 @@ export const useRoom = (code: string, player: { id: string; name: string } | nul
       socket.onopen = () => {
         retries = 0;
         setStatus('connected');
-        socket.send(
-          JSON.stringify({ type: 'join', playerId, name: nameRef.current } satisfies ClientMessage),
-        );
+        const name = nameRef.current;
+        const hello: ClientMessage =
+          name === null ? { type: 'watch' } : { type: 'join', playerId, name };
+        socket.send(JSON.stringify(hello));
       };
       socket.onmessage = (event: MessageEvent<string>) => {
-        if (event.data === 'pong') return;
+        if (disposed || event.data === 'pong') return;
         const parsed = ServerMessageSchema.safeParse(JSON.parse(event.data));
         if (!parsed.success) return;
         if (parsed.data.type === 'state') setRoom(parsed.data.room);
@@ -87,10 +88,10 @@ export const useRoom = (code: string, player: { id: string; name: string } | nul
     };
   }, [code, playerId, removed]);
 
-  // A name change on an open connection is a re-join under the same id.
+  // Taking a seat, or changing name, on an open connection is a (re-)join under the same id.
   useEffect(() => {
-    if (playerId !== null && player?.name) send({ type: 'join', playerId, name: player.name });
-  }, [player?.name, playerId, send]);
+    if (name !== null) send({ type: 'join', playerId, name });
+  }, [name, playerId, send]);
 
   return { room, status, removed, send, rejoin: () => setRemoved(false) };
 };

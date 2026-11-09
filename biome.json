@@ -44,6 +44,11 @@
       "quoteStyle": "single"
     }
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "files": {
     "includes": [
       "**/*",

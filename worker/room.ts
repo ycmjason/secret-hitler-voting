@@ -84,8 +84,8 @@ export class Room extends DurableObject<Env> {
     const sockets = this.openSockets();
     const onlineIds = new Set(sockets.map(getPlayerId).filter(id => id !== null));
     for (const ws of sockets) {
+      // Watchers (no player yet) get a view too: it holds no votes, only who's seated.
       const viewerId = getPlayerId(ws);
-      if (viewerId === null) continue;
       send(ws, { type: 'state', room: toRoomView(state, { viewerId, onlineIds }) });
     }
   }

@@ -7,9 +7,14 @@ export type Vote = z.infer<typeof VoteSchema>;
 
 const PlayerIdSchema = z.string().min(1).max(64);
 
-/** Messages a client sends over the room's WebSocket. Send `join` first on every connection. */
+/**
+ * Messages a client sends over the room's WebSocket. Send `join` (or `watch`, to look without
+ * taking a seat) first on every connection.
+ */
 export const ClientMessageSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('join'), playerId: PlayerIdSchema, name: z.string() }),
+  /** Receive the room's state without taking a seat, e.g. to show who's seated before joining. */
+  z.object({ type: z.literal('watch') }),
   /** `null` withdraws the vote. Ignored once the result is shown, or if the sender is dead. */
   z.object({ type: z.literal('vote'), vote: VoteSchema.nullable() }),
   /** Show the result now, even if not everyone has voted. */
@@ -26,6 +31,8 @@ export const ResultSchema = z.object({
   nein: z.number().int().nonnegative(),
   /** A vote passes only on a strict majority of JA!; a tie fails. */
   passed: z.boolean(),
+  /** Living players who hadn't voted when the result was shown early; 0 if everyone voted. */
+  missing: z.number().int().nonnegative().default(0),
 });
 export type Result = z.infer<typeof ResultSchema>;
 

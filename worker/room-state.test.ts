@@ -35,13 +35,13 @@ describe('voting', () => {
       vote('b', 'ja'),
       vote('c', 'nein'),
     ]);
-    expect(state.result).toEqual({ ja: 2, nein: 1, passed: true });
-    expect(state.history).toEqual([{ round: 1, ja: 2, nein: 1, passed: true }]);
+    expect(state.result).toEqual({ ja: 2, nein: 1, passed: true, missing: 0 });
+    expect(state.history).toEqual([{ round: 1, ja: 2, nein: 1, passed: true, missing: 0 }]);
   });
 
   it('fails on a tie', () => {
     const state = run([join('a'), join('b'), vote('a', 'ja'), vote('b', 'nein')]);
-    expect(state.result).toEqual({ ja: 1, nein: 1, passed: false });
+    expect(state.result).toEqual({ ja: 1, nein: 1, passed: false, missing: 0 });
   });
 
   it('lets a player change or withdraw a vote before the result', () => {
@@ -52,7 +52,7 @@ describe('voting', () => {
 
   it('ignores votes after the result is shown', () => {
     const state = run([join('a'), vote('a', 'ja'), vote('a', 'nein')]);
-    expect(state.result).toEqual({ ja: 1, nein: 0, passed: true });
+    expect(state.result).toEqual({ ja: 1, nein: 0, passed: true, missing: 0 });
   });
 
   it('ignores votes from connections that have not joined', () => {
@@ -74,6 +74,17 @@ describe('anonymity', () => {
   });
 });
 
+describe('watching', () => {
+  it('changes nothing, and a watcher sees who is seated but no votes', () => {
+    const state = run([join('a'), vote('a', 'ja')]);
+    expect(applyMessage(state, null, { type: 'watch' })).toBe(state);
+    const watcherView = toRoomView(state, { viewerId: null, onlineIds: new Set(['a']) });
+    expect(watcherView.players.map(p => p.id)).toEqual(['a']);
+    expect(watcherView.myVote).toBeNull();
+    expect(JSON.stringify(watcherView)).not.toMatch(/:"ja"/);
+  });
+});
+
 describe('dead players', () => {
   it('do not vote and are not waited for', () => {
     const state = run([
@@ -91,7 +102,7 @@ describe('dead players', () => {
         ['a', { type: 'set-dead', playerId: 'b', dead: true }],
         vote('a', 'ja'),
       ]).result,
-    ).toEqual({ ja: 1, nein: 0, passed: true });
+    ).toEqual({ ja: 1, nein: 0, passed: true, missing: 0 });
   });
 
   it('marking the last holdout dead shows the result', () => {
@@ -101,14 +112,23 @@ describe('dead players', () => {
       vote('a', 'ja'),
       ['a', { type: 'set-dead', playerId: 'b', dead: true }],
     ]);
-    expect(state.result).toEqual({ ja: 1, nein: 0, passed: true });
+    expect(state.result).toEqual({ ja: 1, nein: 0, passed: true, missing: 0 });
   });
 });
 
 describe('room controls', () => {
-  it('reveal shows the result early', () => {
-    const state = run([join('a'), join('b'), vote('a', 'ja'), ['b', { type: 'reveal' }]]);
-    expect(state.result).toEqual({ ja: 1, nein: 0, passed: true });
+  it('reveal shows the result early, counting the living players who had not voted', () => {
+    const state = run([
+      join('a'),
+      join('b'),
+      join('c'),
+      join('d'),
+      ['a', { type: 'set-dead', playerId: 'd', dead: true }],
+      vote('a', 'ja'),
+      ['b', { type: 'reveal' }],
+    ]);
+    expect(state.result).toEqual({ ja: 1, nein: 0, passed: true, missing: 2 });
+    expect(state.history).toEqual([{ round: 1, ja: 1, nein: 0, passed: true, missing: 2 }]);
   });
 
   it('reset after a result starts the next round', () => {
@@ -132,7 +152,7 @@ describe('room controls', () => {
       ['a', { type: 'remove', playerId: 'b' }],
     ]);
     expect(state.players.map(p => p.id)).toEqual(['a']);
-    expect(state.result).toEqual({ ja: 0, nein: 1, passed: false });
+    expect(state.result).toEqual({ ja: 0, nein: 1, passed: false, missing: 0 });
   });
 
   it('ignores controls from connections that have not joined', () => {
