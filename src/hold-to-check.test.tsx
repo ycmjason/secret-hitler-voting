@@ -31,6 +31,37 @@ describe('hold to check', () => {
     expect(container.textContent).toContain('sealed');
   });
 
+  it('reseals when the pointer is released on the bar itself', () => {
+    const { container, bar } = renderBar();
+    fireEvent.pointerDown(bar, { button: 0, pointerId: 1 });
+    expect(bar.textContent).toBe('You voted NEIN');
+    fireEvent.pointerUp(bar, { button: 0, pointerId: 1 });
+    expect(container.textContent).not.toMatch(/NEIN/);
+    fireEvent.pointerDown(bar, { button: 0, pointerId: 1 });
+    fireEvent.pointerCancel(bar, { pointerId: 1 });
+    expect(container.textContent).not.toMatch(/NEIN/);
+  });
+
+  it('ignores buttons other than the primary one', () => {
+    const { container, bar } = renderBar();
+    fireEvent.pointerDown(bar, { button: 2 });
+    expect(container.textContent).not.toMatch(/NEIN/);
+  });
+
+  it('reseals when the tab is hidden', () => {
+    const { container, bar } = renderBar();
+    fireEvent.pointerDown(bar, { button: 0 });
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+    try {
+      act(() => {
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+    } finally {
+      delete (document as { visibilityState?: unknown }).visibilityState;
+    }
+    expect(container.textContent).not.toMatch(/NEIN/);
+  });
+
   it('works from the keyboard: hold Space or Enter', () => {
     const { container, bar } = renderBar();
     for (const key of [' ', 'Enter']) {

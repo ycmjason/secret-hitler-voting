@@ -155,6 +155,17 @@ describe('room controls', () => {
     expect(state.result).toEqual({ ja: 0, nein: 1, passed: false, missing: 0 });
   });
 
+  it('lets a player remove themselves', () => {
+    const state = run([
+      join('a'),
+      join('b'),
+      vote('b', 'ja'),
+      ['a', { type: 'remove', playerId: 'a' }],
+    ]);
+    expect(state.players.map(p => p.id)).toEqual(['b']);
+    expect(state.result).toEqual({ ja: 1, nein: 0, passed: true, missing: 0 });
+  });
+
   it('ignores controls from connections that have not joined', () => {
     const state = run([join('a'), [null, { type: 'remove', playerId: 'a' }]]);
     expect(state.players).toHaveLength(1);

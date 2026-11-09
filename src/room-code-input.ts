@@ -16,13 +16,25 @@ export const parseTypedLetters = (raw: string): LetterInput => {
   return { kind: 'letters', letters: [...letters] };
 };
 
+const L = ROOM_CODE_LENGTH;
+/** A room link's path segment: `/MBZR`, then a `/`, `?`, `#`, or only punctuation to the end. */
+const PATH_CODE = new RegExp(`/([A-Z]{${L}})(?:[/?#]|[^A-Z0-9]*$)`);
+/** A word of exactly four letters on its own, like a code typed into a message. */
+const STANDALONE_CODES = new RegExp(`(?<![A-Z])[A-Z]{${L}}(?![A-Z])`, 'g');
+/** The last four letters of the text. */
+const TRAILING_CODE = new RegExp(`([A-Z]{${L}})[^A-Z]*$`);
+
 /**
- * What pasting into a code box means. A bare code (`mbzr`) or a whole room link
- * (`https://…/MBZR`) gives the code: the last four letters. Anything shorter is treated as typed.
+ * What pasting into a code box means. A room link gives its path's code, even with a query
+ * after it (`https://…/MBZR?utm_source=share`); otherwise a four-letter word (`mbzr`, the last
+ * if there are several); otherwise the last four letters. Anything shorter is treated as typed.
  */
 export const parsePastedText = (text: string): LetterInput => {
   const upper = text.trim().toUpperCase();
-  const code = upper.match(new RegExp(`([A-Z]{${ROOM_CODE_LENGTH}})[^A-Z]*$`))?.[1];
+  const code =
+    upper.match(PATH_CODE)?.[1] ??
+    upper.match(STANDALONE_CODES)?.at(-1) ??
+    upper.match(TRAILING_CODE)?.[1];
   if (!code) return parseTypedLetters(upper);
   if (AMBIGUOUS.test(code)) return { kind: 'rejected' };
   return { kind: 'letters', letters: [...code] };

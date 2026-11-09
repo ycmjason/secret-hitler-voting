@@ -19,17 +19,25 @@ export const HoldToCheck = ({
 }) => {
   const [held, setHeld] = useState(false);
 
-  // Let go anywhere, or lose the window, and it reseals.
+  const release = () => setHeld(false);
+
+  // A stuck-open bar shows your vote to the table, so every way of letting go reseals it: the
+  // button's own pointer events (below), a release anywhere, losing the window or hiding the tab.
   useEffect(() => {
     if (!held) return;
     const release = () => setHeld(false);
+    const releaseIfHidden = () => {
+      if (document.visibilityState === 'hidden') release();
+    };
     window.addEventListener('pointerup', release);
     window.addEventListener('pointercancel', release);
     window.addEventListener('blur', release);
+    document.addEventListener('visibilitychange', releaseIfHidden);
     return () => {
       window.removeEventListener('pointerup', release);
       window.removeEventListener('pointercancel', release);
       window.removeEventListener('blur', release);
+      document.removeEventListener('visibilitychange', releaseIfHidden);
     };
   }, [held]);
 
@@ -45,18 +53,24 @@ export const HoldToCheck = ({
         type="button"
         className="hold"
         onPointerDown={event => {
+          if (event.button !== 0) return;
           event.preventDefault();
+          // Capture the pointer so its release always comes back to this button.
+          event.currentTarget.setPointerCapture?.(event.pointerId);
           hold();
         }}
+        onPointerUp={release}
+        onPointerCancel={release}
+        onLostPointerCapture={release}
         onKeyDown={event => {
           if (!isHoldKey(event.key)) return;
           event.preventDefault();
           if (!event.repeat) hold();
         }}
         onKeyUp={event => {
-          if (isHoldKey(event.key)) setHeld(false);
+          if (isHoldKey(event.key)) release();
         }}
-        onBlur={() => setHeld(false)}
+        onBlur={release}
         onContextMenu={event => event.preventDefault()}
       >
         {held ? (

@@ -1,3 +1,17 @@
+import type { RoomSnapshot } from './use-room.ts';
+
+/**
+ * Whether `next` brings a result that arrived while we watched, so it should be revealed with the
+ * animation. The first view after a (re)connect is only a baseline: a phone that slept through
+ * the end of a round, or a reload, shows the result straight away.
+ */
+export const isLiveReveal = (previous: RoomSnapshot | null, next: RoomSnapshot): boolean =>
+  previous !== null &&
+  previous.connection === next.connection &&
+  previous.room.round === next.room.round &&
+  previous.room.result === null &&
+  next.room.result !== null;
+
 /**
  * The reveal's clock, in seconds from the moment the result arrives (see the reveal table in
  * design/sketches/opus/NOTES.md). The count always fits in COUNT_SPAN, whatever the table size.

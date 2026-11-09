@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { countedAt, revealTimeline } from './reveal.ts';
+import type { RoomView } from '../shared/protocol.ts';
+import { countedAt, isLiveReveal, revealTimeline } from './reveal.ts';
 
 describe('the reveal clock', () => {
   it('settles a 4–2 vote at about 1.37 s', () => {
@@ -25,5 +26,35 @@ describe('the reveal clock', () => {
         [4, 2],
       ],
     );
+  });
+});
+
+describe('when to play the reveal', () => {
+  const room = (round: number, shown: boolean): RoomView => ({
+    code: 'ABCD',
+    round,
+    players: [],
+    myVote: null,
+    result: shown ? { ja: 1, nein: 0, passed: true, missing: 0 } : null,
+    history: [],
+  });
+  const at = (connection: number, round: number, shown: boolean) => ({
+    room: room(round, shown),
+    connection,
+  });
+
+  it('plays when the result arrives on the connection that saw the vote open', () => {
+    expect(isLiveReveal(at(1, 5, false), at(1, 5, true))).toBe(true);
+  });
+
+  it('treats the first view after a (re)connect as a baseline', () => {
+    expect(isLiveReveal(null, at(1, 5, true))).toBe(false);
+    // The phone slept mid-vote and wakes to the finished round.
+    expect(isLiveReveal(at(1, 5, false), at(2, 5, true))).toBe(false);
+  });
+
+  it('does not play for a result already shown, or one from another round', () => {
+    expect(isLiveReveal(at(1, 5, true), at(1, 5, true))).toBe(false);
+    expect(isLiveReveal(at(1, 4, false), at(1, 5, true))).toBe(false);
   });
 });

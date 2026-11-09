@@ -28,6 +28,23 @@ describe('pasting into a code box', () => {
     }
   });
 
+  it('takes the code from a link with a query or fragment after it', () => {
+    for (const link of [
+      'https://secret-hitler-voting.ycmjason.com/KXQT?utm_source=share',
+      'https://secret-hitler-voting.ycmjason.com/kxqt#invite',
+      'https://secret-hitler-voting.ycmjason.com/KXQT/?ref=qr',
+    ]) {
+      expect(parsePastedText(link)).toEqual({ kind: 'letters', letters: ['K', 'X', 'Q', 'T'] });
+    }
+  });
+
+  it('takes a four-letter word from a message without a link', () => {
+    expect(parsePastedText('Room code: KXQT, see you there!')).toEqual({
+      kind: 'letters',
+      letters: ['K', 'X', 'Q', 'T'],
+    });
+  });
+
   it('rejects a code with I or O', () => {
     expect(parsePastedText('https://secret-hitler-voting.ycmjason.com/MBZO')).toEqual({
       kind: 'rejected',

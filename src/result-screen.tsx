@@ -127,7 +127,12 @@ export const ResultScreen = ({
       setTimeout(() => window.removeEventListener('click', swallowClick, { capture: true }), 600);
       skipRef.current();
     };
-    const onKeyDown = () => skipRef.current();
+    // The key only skips: it mustn't also press a focused button such as "New vote".
+    const onKeyDown = (event: KeyboardEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      skipRef.current();
+    };
     window.addEventListener('pointerdown', onPointerDown, { capture: true });
     window.addEventListener('keydown', onKeyDown, { capture: true });
     return () => {
@@ -151,7 +156,10 @@ export const ResultScreen = ({
           {result.missing === 0 ? 'ALL BALLOTS IN' : 'SHOWN EARLY'}
         </div>
       )}
-      <div className={playing ? 'pointer-events-none flex flex-col gap-4' : 'flex flex-col gap-4'}>
+      <div
+        className={playing ? 'pointer-events-none flex flex-col gap-4' : 'flex flex-col gap-4'}
+        inert={playing}
+      >
         {header}
         <div
           className={

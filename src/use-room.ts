@@ -3,6 +3,12 @@ import { type ClientMessage, type RoomView, ServerMessageSchema } from '../share
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting';
 
+/**
+ * The latest room view, and which connection delivered it. `connection` goes up by one with the
+ * first state on every new socket, so the first view after a (re)connect can be told apart.
+ */
+export type RoomSnapshot = { room: RoomView; connection: number };
+
 const PING_INTERVAL_MS = 20_000;
 const MAX_RETRY_DELAY_MS = 5_000;
 
@@ -12,7 +18,8 @@ const MAX_RETRY_DELAY_MS = 5_000;
  * With `name: null` it only watches: it receives the room's state without taking a seat.
  */
 export const useRoom = (code: string, player: { id: string; name: string | null }) => {
-  const [room, setRoom] = useState<RoomView | null>(null);
+  const [snapshot, setSnapshot] = useState<RoomSnapshot | null>(null);
+  const connectionRef = useRef(0);
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
   const [removed, setRemoved] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
@@ -36,9 +43,9 @@ export const useRoom = (code: string, player: { id: string; name: string | null 
       const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
       const socket = new WebSocket(`${protocol}//${location.host}/api/rooms/${code}/ws`);
       socketRef.current = socket;
+      let gotState = false;
       socket.onopen = () => {
         retries = 0;
-        setStatus('connected');
         const name = nameRef.current;
         const hello: ClientMessage =
           name === null ? { type: 'watch' } : { type: 'join', playerId, name };
@@ -48,11 +55,18 @@ export const useRoom = (code: string, player: { id: string; name: string | null 
         if (disposed || event.data === 'pong') return;
         const parsed = ServerMessageSchema.safeParse(JSON.parse(event.data));
         if (!parsed.success) return;
-        if (parsed.data.type === 'state') setRoom(parsed.data.room);
-        else {
+        if (parsed.data.type === 'state') {
+          // Connected only once the room is current again, so a stale screen stays frozen until then.
+          if (!gotState) {
+            gotState = true;
+            connectionRef.current += 1;
+            setStatus('connected');
+          }
+          setSnapshot({ room: parsed.data.room, connection: connectionRef.current });
+        } else {
           disposed = true;
           setRemoved(true);
-          setRoom(null);
+          setSnapshot(null);
           socket.close();
         }
       };
@@ -93,5 +107,12 @@ export const useRoom = (code: string, player: { id: string; name: string | null 
     if (name !== null) send({ type: 'join', playerId, name });
   }, [name, playerId, send]);
 
-  return { room, status, removed, send, rejoin: () => setRemoved(false) };
+  return {
+    room: snapshot?.room ?? null,
+    snapshot,
+    status,
+    removed,
+    send,
+    rejoin: () => setRemoved(false),
+  };
 };
